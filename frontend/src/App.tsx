@@ -8,24 +8,8 @@ import ManagePollPage from './ManagePollPage'
 import PollInfoPage from './PollInfoPage'
 import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
+import { polls } from './pollData'
 import { CreatedPoll, PollStatus } from './types'
-
-const polls = [
-  {
-    id: 1,
-    title: 'Студенческие мероприятия',
-    questions: 3,
-    access: 'Для всех',
-    status: 'Активен',
-  },
-  {
-    id: 2,
-    title: 'Выбор формата занятий',
-    questions: 4,
-    access: 'После входа',
-    status: 'Активен',
-  },
-]
 
 function PollList() {
   const [search, setSearch] = useState('')
@@ -50,7 +34,7 @@ function PollList() {
         {visiblePolls.map((poll) => (
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
-            <p>Вопросов: {poll.questions}</p>
+            <p>Вопросов: {poll.questions.length}</p>
             <div className="poll-tags">
               <Chip color="success" label={poll.status} size="small" />
               <Chip label={poll.access} size="small" />

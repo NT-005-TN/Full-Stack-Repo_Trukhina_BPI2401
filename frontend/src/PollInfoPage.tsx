@@ -1,8 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { poll } from './pollData'
+import { polls } from './pollData'
 
 export default function PollInfoPage() {
+  const { pollId } = useParams()
+  const poll = polls.find((item) => item.id === Number(pollId))
+
+  if (!poll) {
+    return <main><h1>Опрос не найден</h1></main>
+  }
+
   return (
     <main className="small-page">
       <Chip color="success" label="Опрос активен" />

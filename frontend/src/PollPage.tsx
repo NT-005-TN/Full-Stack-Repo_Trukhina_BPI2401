@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
   Alert,
   Button,
@@ -12,10 +12,10 @@ import {
   Radio,
   RadioGroup,
 } from '@mui/material'
-import { poll } from './pollData'
+import { polls } from './pollData'
 
-function loadAnswers() {
-  const savedAnswers = sessionStorage.getItem('pollAnswers')
+function loadAnswers(key: string) {
+  const savedAnswers = sessionStorage.getItem(key)
 
   try {
     return savedAnswers ? JSON.parse(savedAnswers) : []
@@ -25,10 +25,14 @@ function loadAnswers() {
 }
 
 export default function PollPage() {
+  const { pollId } = useParams()
+  const poll = polls.find((item) => item.id === Number(pollId)) || polls[0]
+  const answersKey = `pollAnswers-${poll.id}`
+  const questionKey = `pollQuestion-${poll.id}`
   const [questionIndex, setQuestionIndex] = useState(
-    Number(sessionStorage.getItem('pollQuestion') || 0),
+    Number(sessionStorage.getItem(questionKey) || 0),
   )
-  const [answers, setAnswers] = useState<string[]>(loadAnswers)
+  const [answers, setAnswers] = useState<string[]>(() => loadAnswers(answersKey))
   const [isReview, setIsReview] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -39,9 +43,9 @@ export default function PollPage() {
   const allQuestionsAnswered = answeredCount === poll.questions.length
 
   useEffect(() => {
-    sessionStorage.setItem('pollAnswers', JSON.stringify(answers))
-    sessionStorage.setItem('pollQuestion', String(questionIndex))
-  }, [answers, questionIndex])
+    sessionStorage.setItem(answersKey, JSON.stringify(answers))
+    sessionStorage.setItem(questionKey, String(questionIndex))
+  }, [answers, answersKey, questionIndex, questionKey])
 
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]
@@ -117,8 +121,8 @@ export default function PollPage() {
             <Button onClick={() => setIsConfirmOpen(false)}>Отмена</Button>
             <Button
               onClick={() => {
-                sessionStorage.removeItem('pollAnswers')
-                sessionStorage.removeItem('pollQuestion')
+                sessionStorage.removeItem(answersKey)
+                sessionStorage.removeItem(questionKey)
                 setIsConfirmOpen(false)
                 setIsFinished(true)
               }}
