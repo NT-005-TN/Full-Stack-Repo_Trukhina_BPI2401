@@ -124,8 +124,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+python -m app.init_db
 uvicorn app.main:app --reload
 ```
+
+Перед командой `python -m app.init_db` создайте пустую локальную базу PostgreSQL
+с именем `polls` и укажите строку подключения в `backend/.env`. Команда создаст
+семь связанных таблиц из моделей SQLAlchemy. Файл `.env` исключён из Git;
+репозиторий содержит только безопасный пример `.env.example`.
 
 После запуска проверка состояния API доступна по адресу
 `http://localhost:8000/health`, а интерактивная документация — по адресу
