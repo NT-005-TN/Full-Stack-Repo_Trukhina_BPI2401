@@ -91,6 +91,23 @@ main {
   margin-top: 24px;
 }
 
+.create-form {
+  display: grid;
+  gap: 20px;
+}
+
+.section-title,
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-title h2 {
+  margin: 0;
+}
+
 @media (max-width: 600px) {
   header {
     padding: 16px;
@@ -98,5 +115,15 @@ main {
 
   main {
     padding: 28px 16px;
+  }
+
+  nav {
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .option-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

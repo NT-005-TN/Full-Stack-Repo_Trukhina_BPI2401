@@ -1,0 +1,148 @@
+import { FormEvent, useState } from 'react'
+import { Alert, Button, MenuItem, TextField } from '@mui/material'
+
+type Question = {
+  id: number
+  text: string
+  options: string[]
+}
+
+export default function CreatePollPage() {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [access, setAccess] = useState('public')
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: 1, text: '', options: ['', ''] },
+  ])
+  const [message, setMessage] = useState('')
+
+  function changeQuestion(questionIndex: number, text: string) {
+    const newQuestions = [...questions]
+    newQuestions[questionIndex].text = text
+    setQuestions(newQuestions)
+  }
+
+  function changeOption(questionIndex: number, optionIndex: number, text: string) {
+    const newQuestions = [...questions]
+    newQuestions[questionIndex].options[optionIndex] = text
+    setQuestions(newQuestions)
+  }
+
+  function addQuestion() {
+    setQuestions([
+      ...questions,
+      { id: Date.now(), text: '', options: ['', ''] },
+    ])
+  }
+
+  function removeQuestion(questionIndex: number) {
+    setQuestions(questions.filter((_, index) => index !== questionIndex))
+  }
+
+  function addOption(questionIndex: number) {
+    const newQuestions = [...questions]
+    newQuestions[questionIndex].options.push('')
+    setQuestions(newQuestions)
+  }
+
+  function removeOption(questionIndex: number, optionIndex: number) {
+    const newQuestions = [...questions]
+    newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter(
+      (_, index) => index !== optionIndex,
+    )
+    setQuestions(newQuestions)
+  }
+
+  function savePoll(event: FormEvent) {
+    event.preventDefault()
+    setMessage('Опрос сохранён как черновик.')
+  }
+
+  return (
+    <main>
+      <h1>Создание опроса</h1>
+      {message && <Alert severity="success">{message}</Alert>}
+
+      <form className="create-form" onSubmit={savePoll}>
+        <section className="card form">
+          <TextField
+            required
+            label="Название опроса"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+          <TextField
+            label="Описание"
+            multiline
+            rows={3}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+          <TextField
+            label="Кто может участвовать"
+            select
+            value={access}
+            onChange={(event) => setAccess(event.target.value)}
+          >
+            <MenuItem value="public">Все по ссылке</MenuItem>
+            <MenuItem value="registered">Только зарегистрированные</MenuItem>
+          </TextField>
+        </section>
+
+        {questions.map((question, questionIndex) => (
+          <section className="card form" key={question.id}>
+            <div className="section-title">
+              <h2>Вопрос {questionIndex + 1}</h2>
+              {questions.length > 1 && (
+                <Button color="error" onClick={() => removeQuestion(questionIndex)}>
+                  Удалить вопрос
+                </Button>
+              )}
+            </div>
+
+            <TextField
+              required
+              label="Текст вопроса"
+              value={question.text}
+              onChange={(event) => changeQuestion(questionIndex, event.target.value)}
+            />
+
+            {question.options.map((option, optionIndex) => (
+              <div className="option-row" key={optionIndex}>
+                <TextField
+                  required
+                  fullWidth
+                  label={`Вариант ${optionIndex + 1}`}
+                  value={option}
+                  onChange={(event) => changeOption(
+                    questionIndex,
+                    optionIndex,
+                    event.target.value,
+                  )}
+                />
+                {question.options.length > 2 && (
+                  <Button color="error" onClick={() => removeOption(questionIndex, optionIndex)}>
+                    Удалить
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            <Button onClick={() => addOption(questionIndex)}>
+              Добавить вариант
+            </Button>
+          </section>
+        ))}
+
+        <div className="actions">
+          <Button onClick={addQuestion} variant="outlined">
+            Добавить вопрос
+          </Button>
+          <Button type="submit" variant="contained">
+            Сохранить черновик
+          </Button>
+        </div>
+      </form>
+    </main>
+  )
+}
