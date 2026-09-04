@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Chip, Tab, Tabs } from '@mui/material'
-import { CreatedPoll } from './types'
+import { CreatedPoll } from '../entities/poll/types'
 
 const completedPolls = [
   { id: 1, title: 'Студенческие мероприятия', date: '4 сентября 2026' },

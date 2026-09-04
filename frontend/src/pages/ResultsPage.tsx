@@ -1,6 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { LinearProgress } from '@mui/material'
-import { polls } from './pollData'
+import { polls } from '../entities/poll/data'
+import PageMessage from '../shared/ui/PageMessage'
 
 const voteCounts = [18, 12, 10, 7]
 
@@ -13,7 +14,7 @@ export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
   const poll = polls.find((item) => item.id === Number(pollId))
 
   if (!poll) {
-    return <main><h1>Результаты не найдены</h1></main>
+    return <PageMessage title="Результаты не найдены" linkText="Вернуться к опросам" linkTo="/" />
   }
 
   if (poll.access === 'После входа' && !isLoggedIn) {

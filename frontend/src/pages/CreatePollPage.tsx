@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Button, MenuItem, TextField } from '@mui/material'
-import { CreatedPoll } from './types'
+import { CreatedPoll } from '../entities/poll/types'
 
 type Question = {
   id: number

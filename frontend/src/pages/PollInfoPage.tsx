@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { polls } from './pollData'
+import { polls } from '../entities/poll/data'
+import PageMessage from '../shared/ui/PageMessage'
 
 type PollInfoPageProps = {
   isLoggedIn: boolean
@@ -11,7 +12,7 @@ export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
   const poll = polls.find((item) => item.id === Number(pollId))
 
   if (!poll) {
-    return <main><h1>Опрос не найден</h1></main>
+    return <PageMessage title="Опрос не найден" linkText="Вернуться к опросам" linkTo="/" />
   }
 
   if (poll.access === 'После входа' && !isLoggedIn) {

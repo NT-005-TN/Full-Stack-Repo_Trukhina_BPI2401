@@ -12,7 +12,8 @@ import {
   Radio,
   RadioGroup,
 } from '@mui/material'
-import { polls } from './pollData'
+import { polls } from '../entities/poll/data'
+import PageMessage from '../shared/ui/PageMessage'
 
 function loadAnswers(key: string) {
   const savedAnswers = sessionStorage.getItem(key)
@@ -53,7 +54,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
   }, [answers, answersKey, questionIndex, questionKey])
 
   if (!selectedPoll) {
-    return <main><h1>Опрос не найден</h1></main>
+    return <PageMessage title="Опрос не найден" linkText="Вернуться к опросам" linkTo="/" />
   }
 
   if (poll.access === 'После входа' && !isLoggedIn) {

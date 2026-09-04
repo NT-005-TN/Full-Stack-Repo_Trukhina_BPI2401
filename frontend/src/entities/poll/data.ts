@@ -1,4 +1,6 @@
-export const polls = [
+import { Poll } from './types'
+
+export const polls: Poll[] = [
   {
     id: 1,
     title: 'Студенческие мероприятия',

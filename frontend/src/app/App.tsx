@@ -1,68 +1,16 @@
 import { useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
-import { Button, Chip, TextField } from '@mui/material'
-import AuthPage from './AuthPage'
-import CreatePollPage from './CreatePollPage'
-import HistoryPage from './HistoryPage'
-import ManagePollPage from './ManagePollPage'
-import PollInfoPage from './PollInfoPage'
-import PollPage from './PollPage'
-import ResultsPage from './ResultsPage'
-import { polls } from './pollData'
-import { CreatedPoll, PollStatus } from './types'
-
-function PollList() {
-  const [search, setSearch] = useState('')
-  const visiblePolls = polls.filter((poll) =>
-    poll.title.toLowerCase().includes(search.toLowerCase()),
-  )
-
-  return (
-    <main>
-      <h1>Доступные опросы</h1>
-      <p>Выберите опрос, чтобы принять участие.</p>
-
-      <TextField
-        className="search-field"
-        fullWidth
-        label="Поиск по названию"
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-      />
-
-      <div className="poll-list">
-        {visiblePolls.map((poll) => (
-          <article className="card" key={poll.id}>
-            <h2>{poll.title}</h2>
-            <p>Вопросов: {poll.questions.length}</p>
-            <div className="poll-tags">
-              <Chip color="success" label={poll.status} size="small" />
-              <Chip label={poll.access} size="small" />
-            </div>
-            <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
-              Открыть опрос
-            </Button>
-            {poll.id === 1 && (
-              <Button component={Link} to={`/polls/${poll.id}/results`}>
-                Результаты
-              </Button>
-            )}
-          </article>
-        ))}
-        {visiblePolls.length === 0 && <p>Опросы не найдены.</p>}
-      </div>
-    </main>
-  )
-}
-
-function NotFound() {
-  return (
-    <main>
-      <h1>Страница не найдена</h1>
-      <Link to="/">Вернуться к опросам</Link>
-    </main>
-  )
-}
+import { Button } from '@mui/material'
+import { CreatedPoll, PollStatus } from '../entities/poll/types'
+import AuthPage from '../pages/AuthPage'
+import CreatePollPage from '../pages/CreatePollPage'
+import HistoryPage from '../pages/HistoryPage'
+import ManagePollPage from '../pages/ManagePollPage'
+import NotFoundPage from '../pages/NotFoundPage'
+import PollInfoPage from '../pages/PollInfoPage'
+import PollListPage from '../pages/PollListPage'
+import PollPage from '../pages/PollPage'
+import ResultsPage from '../pages/ResultsPage'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -111,7 +59,7 @@ export default function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={<PollList />} />
+        <Route path="/" element={<PollListPage />} />
         <Route
           path="/login"
           element={<AuthPage onGuest={logout} onLogin={login} />}
@@ -137,7 +85,7 @@ export default function App() {
         <Route path="/polls/:pollId" element={<PollInfoPage isLoggedIn={isLoggedIn} />} />
         <Route path="/polls/:pollId/vote" element={<PollPage isLoggedIn={isLoggedIn} />} />
         <Route path="/polls/:pollId/results" element={<ResultsPage isLoggedIn={isLoggedIn} />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   )

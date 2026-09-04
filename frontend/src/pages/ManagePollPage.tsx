@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { polls as demoPolls } from './pollData'
-import { CreatedPoll, PollStatus } from './types'
+import { polls as demoPolls } from '../entities/poll/data'
+import { CreatedPoll, PollStatus } from '../entities/poll/types'
 
 type ManagePollPageProps = {
   polls: CreatedPoll[]
