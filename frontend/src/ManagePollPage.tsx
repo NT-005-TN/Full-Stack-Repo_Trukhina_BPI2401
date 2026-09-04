@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
+import { polls as demoPolls } from './pollData'
 import { CreatedPoll, PollStatus } from './types'
 
 type ManagePollPageProps = {
@@ -12,6 +13,7 @@ export default function ManagePollPage({ polls, onStatusChange }: ManagePollPage
   const { pollId } = useParams()
   const [message, setMessage] = useState('')
   const selectedPoll = polls.find((poll) => poll.id === Number(pollId))
+  const hasResults = demoPolls.some((poll) => poll.id === selectedPoll?.id)
 
   if (!selectedPoll) {
     return <main><h1>Опрос не найден</h1></main>
@@ -57,12 +59,15 @@ export default function ManagePollPage({ polls, onStatusChange }: ManagePollPage
               Завершить опрос
             </Button>
           )}
-          {selectedPoll.status !== 'Черновик' && (
+          {selectedPoll.status !== 'Черновик' && hasResults && (
             <Button component={Link} to={`/polls/${selectedPoll.id}/results`}>
               Посмотреть результаты
             </Button>
           )}
         </div>
+        {selectedPoll.status !== 'Черновик' && !hasResults && (
+          <p className="hint">Результаты появятся после получения ответов.</p>
+        )}
       </section>
     </main>
   )
