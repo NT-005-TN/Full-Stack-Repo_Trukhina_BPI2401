@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { Button, TextField } from '@mui/material'
+import PollPage from './PollPage'
 
 const polls = [
   { id: 1, title: 'Студенческие мероприятия', questions: 3 },
@@ -17,7 +18,9 @@ function PollList() {
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
             <p>Вопросов: {poll.questions}</p>
-            <Button variant="contained">Пройти опрос</Button>
+            <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
+              Пройти опрос
+            </Button>
           </article>
         ))}
       </div>
@@ -62,6 +65,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<PollList />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/polls/:pollId" element={<PollPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

@@ -64,6 +64,26 @@ main {
   gap: 14px;
 }
 
+.question-card {
+  margin-top: 20px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.review-list {
+  display: grid;
+  gap: 20px;
+}
+
+.review-list p {
+  margin-bottom: 0;
+}
+
 @media (max-width: 600px) {
   header {
     padding: 16px;
