@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, MenuItem, TextField } from '@mui/material'
+import { Alert, Button, MenuItem, TextField } from '@mui/material'
 import { CreatedPoll } from './types'
 
 type Question = {
@@ -19,6 +19,8 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   const [description, setDescription] = useState('')
   const [access, setAccess] = useState('public')
   const [resultsAccess, setResultsAccess] = useState('after_finish')
+  const [endDate, setEndDate] = useState('')
+  const [error, setError] = useState('')
   const [questions, setQuestions] = useState<Question[]>([
     { id: 1, text: '', options: ['', ''] },
   ])
@@ -64,6 +66,22 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     event.preventDefault()
     const submitEvent = event.nativeEvent as SubmitEvent
     const button = submitEvent.submitter as HTMLButtonElement
+    const hasEmptyQuestion = questions.some((question) =>
+      !question.text.trim() || question.options.some((option) => !option.trim()),
+    )
+    const today = new Date().toISOString().slice(0, 10)
+
+    if (!title.trim() || hasEmptyQuestion) {
+      setError('Заполните название, все вопросы и варианты ответов.')
+      return
+    }
+
+    if (endDate <= today) {
+      setError('Дата окончания должна быть позже сегодняшней.')
+      return
+    }
+
+    setError('')
 
     onSave({
       id: Date.now(),
@@ -77,6 +95,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   return (
     <main>
       <h1>Создание опроса</h1>
+      {error && <Alert severity="error">{error}</Alert>}
 
       <form className="create-form" onSubmit={savePoll}>
         <section className="card form">
@@ -107,6 +126,8 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
             label="Дата окончания"
             type="date"
             slotProps={{ inputLabel: { shrink: true } }}
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
           />
           <TextField
             label="Когда показывать результаты"
