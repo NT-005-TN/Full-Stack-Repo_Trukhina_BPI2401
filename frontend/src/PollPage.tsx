@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import {
   Alert,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   LinearProgress,
   Radio,
@@ -15,6 +19,7 @@ export default function PollPage() {
   const [answers, setAnswers] = useState<string[]>([])
   const [isReview, setIsReview] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   const question = poll.questions[questionIndex]
   const currentAnswer = answers[questionIndex] || ''
@@ -71,10 +76,29 @@ export default function PollPage() {
         </div>
         <div className="actions">
           <Button onClick={() => setIsReview(false)}>Назад</Button>
-          <Button onClick={() => setIsFinished(true)} variant="contained">
+          <Button onClick={() => setIsConfirmOpen(true)} variant="contained">
             Отправить ответы
           </Button>
         </div>
+
+        <Dialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
+          <DialogTitle>Отправить ответы?</DialogTitle>
+          <DialogContent>
+            После отправки изменить ответы будет нельзя.
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsConfirmOpen(false)}>Отмена</Button>
+            <Button
+              onClick={() => {
+                setIsConfirmOpen(false)
+                setIsFinished(true)
+              }}
+              variant="contained"
+            >
+              Подтвердить отправку
+            </Button>
+          </DialogActions>
+        </Dialog>
       </main>
     )
   }
