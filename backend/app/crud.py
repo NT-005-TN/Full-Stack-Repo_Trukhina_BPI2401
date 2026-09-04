@@ -1,9 +1,59 @@
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from . import models, schemas
+from .security import hash_password
+
+
+
+def list_users(db: Session) -> list[models.User]:
+    return list(db.scalars(select(models.User)).all())
+
+
+def get_user(db: Session, user_id: int) -> Optional[models.User]:
+    return db.get(models.User, user_id)
+
+
+def create_user(db: Session, data: schemas.UserCreate) -> Optional[models.User]:
+    user = models.User(
+        email=data.email,
+        password_hash=hash_password(data.password),
+    )
+    db.add(user)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return None
+    db.refresh(user)
+    return user
+
+
+def update_user(
+    db: Session, user: models.User, data: schemas.UserUpdate
+) -> Optional[models.User]:
+    if data.email is not None:
+        user.email = data.email
+    if data.password is not None:
+        user.password_hash = hash_password(data.password)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return None
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user: models.User) -> bool:
+    if user.polls:
+        return False
+    db.delete(user)
+    db.commit()
+    return True
 
 
 def list_polls(db: Session) -> list[models.Poll]:

@@ -4,6 +4,38 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
+class UserCreate(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=8, max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def email_must_be_valid(cls, value: str) -> str:
+        if "@" not in value or "." not in value.rsplit("@", 1)[-1]:
+            raise ValueError("Введите корректную электронную почту")
+        return value.lower()
+
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = Field(default=None, min_length=5, max_length=255)
+    password: Optional[str] = Field(default=None, min_length=8, max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def email_must_be_valid(cls, value: Optional[str]) -> Optional[str]:
+        if value is not None and (
+            "@" not in value or "." not in value.rsplit("@", 1)[-1]
+        ):
+            raise ValueError("Введите корректную электронную почту")
+        return value.lower() if value is not None else None
+
+
+class UserRead(BaseModel):
+    id: int
+    email: str
+    model_config = ConfigDict(from_attributes=True)
+
+
 class OptionCreate(BaseModel):
     text: str = Field(min_length=1, max_length=300)
 
