@@ -11,6 +11,7 @@ export default function CreatePollPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [access, setAccess] = useState('public')
+  const [resultsAccess, setResultsAccess] = useState('after_finish')
   const [questions, setQuestions] = useState<Question[]>([
     { id: 1, text: '', options: ['', ''] },
   ])
@@ -55,7 +56,14 @@ export default function CreatePollPage() {
 
   function savePoll(event: FormEvent) {
     event.preventDefault()
-    setMessage('Опрос сохранён как черновик.')
+    const submitEvent = event.nativeEvent as SubmitEvent
+    const button = submitEvent.submitter as HTMLButtonElement
+
+    setMessage(
+      button.value === 'publish'
+        ? 'Опрос опубликован.'
+        : 'Опрос сохранён как черновик.',
+    )
   }
 
   return (
@@ -86,6 +94,22 @@ export default function CreatePollPage() {
           >
             <MenuItem value="public">Все по ссылке</MenuItem>
             <MenuItem value="registered">Только зарегистрированные</MenuItem>
+          </TextField>
+          <TextField
+            required
+            label="Дата окончания"
+            type="date"
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <TextField
+            label="Когда показывать результаты"
+            select
+            value={resultsAccess}
+            onChange={(event) => setResultsAccess(event.target.value)}
+          >
+            <MenuItem value="after_vote">Сразу после ответа</MenuItem>
+            <MenuItem value="after_finish">После завершения опроса</MenuItem>
+            <MenuItem value="hidden">Не публиковать</MenuItem>
           </TextField>
         </section>
 
@@ -138,8 +162,11 @@ export default function CreatePollPage() {
           <Button onClick={addQuestion} variant="outlined">
             Добавить вопрос
           </Button>
-          <Button type="submit" variant="contained">
+          <Button name="action" type="submit" value="draft">
             Сохранить черновик
+          </Button>
+          <Button name="action" type="submit" value="publish" variant="contained">
+            Опубликовать
           </Button>
         </div>
       </form>
