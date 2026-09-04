@@ -169,6 +169,9 @@ main {
 
 @media (max-width: 600px) {
   header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
     padding: 16px;
   }
 
@@ -177,12 +180,32 @@ main {
   }
 
   nav {
-    gap: 10px;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
     font-size: 14px;
   }
 
   .option-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .create-form > .actions,
+  .manage-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .create-form > .actions button,
+  .manage-actions a,
+  .manage-actions button {
+    width: 100%;
+  }
+
+  .result-label {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 }
