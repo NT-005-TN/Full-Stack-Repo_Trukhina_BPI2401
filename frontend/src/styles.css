@@ -125,6 +125,16 @@ main {
   margin-bottom: 8px;
 }
 
+.auth-form {
+  margin-top: 20px;
+}
+
+.hint {
+  margin: 0;
+  color: #5f687c;
+  font-size: 14px;
+}
+
 @media (max-width: 600px) {
   header {
     padding: 16px;
