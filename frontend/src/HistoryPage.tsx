@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Chip, Tab, Tabs } from '@mui/material'
+import { Link } from 'react-router-dom'
+import { Button, Chip, Tab, Tabs } from '@mui/material'
 
 const completedPolls = [
   { id: 1, title: 'Студенческие мероприятия', date: '4 сентября 2026' },
@@ -7,8 +8,7 @@ const completedPolls = [
 ]
 
 const createdPolls = [
-  { id: 3, title: 'Любимые дисциплины', status: 'Активен' },
-  { id: 4, title: 'Оценка учебной недели', status: 'Черновик' },
+  { id: 1, title: 'Студенческие мероприятия', status: 'Черновик' },
 ]
 
 export default function HistoryPage() {
@@ -40,6 +40,9 @@ export default function HistoryPage() {
               color={poll.status === 'Активен' ? 'success' : 'default'}
               label={poll.status}
             />
+            <Button component={Link} to={`/manage/${poll.id}`}>
+              Управлять
+            </Button>
           </article>
         ))}
       </div>

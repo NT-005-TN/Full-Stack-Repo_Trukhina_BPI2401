@@ -3,6 +3,7 @@ import { Button } from '@mui/material'
 import AuthPage from './AuthPage'
 import CreatePollPage from './CreatePollPage'
 import HistoryPage from './HistoryPage'
+import ManagePollPage from './ManagePollPage'
 import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
 
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/create" element={<CreatePollPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/manage/:pollId" element={<ManagePollPage />} />
         <Route path="/polls/:pollId" element={<PollPage />} />
         <Route path="/polls/:pollId/results" element={<ResultsPage />} />
         <Route path="*" element={<NotFound />} />

@@ -135,6 +135,17 @@ main {
   font-size: 14px;
 }
 
+.manage-card {
+  margin-top: 20px;
+}
+
+.manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
 @media (max-width: 600px) {
   header {
     padding: 16px;
