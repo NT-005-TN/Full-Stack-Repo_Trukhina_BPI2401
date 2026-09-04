@@ -120,3 +120,24 @@ npm run build
 - `/create` — создание опроса после входа;
 - `/history` — история участий и созданных опросов;
 - `/manage/:pollId` — управление созданным опросом.
+
+## Скриншоты
+
+Актуальные скриншоты сохранены в каталоге `docs/screenshots`:
+
+- [список опросов](docs/screenshots/01-poll-list.jpg);
+- [вход](docs/screenshots/02-login.jpg);
+- [регистрация](docs/screenshots/03-registration.jpg);
+- [информация об опросе](docs/screenshots/04-poll-info.jpg);
+- [вопрос опроса](docs/screenshots/05-poll-question.jpg);
+- [проверка ответов](docs/screenshots/06-answer-review.jpg);
+- [подтверждение отправки](docs/screenshots/07-send-confirmation.jpg);
+- [успешное завершение](docs/screenshots/08-success.jpg);
+- [результаты](docs/screenshots/09-results.jpg);
+- [страница 404](docs/screenshots/10-not-found.jpg);
+- [создание опроса](docs/screenshots/11-create-poll.jpg);
+- [история участий](docs/screenshots/12-history-participation.jpg);
+- [история созданных опросов](docs/screenshots/13-history-created.jpg);
+- [управление опросом](docs/screenshots/14-manage-poll.jpg).
+
+Набор обновлён после завершения маршрутизации, разграничения доступа и поддержки нескольких независимых опросов, поэтому снимки соответствуют итоговой версии ЛР №1.
