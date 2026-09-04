@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { Button, TextField } from '@mui/material'
+import HistoryPage from './HistoryPage'
 import PollPage from './PollPage'
 
 const polls = [
@@ -58,6 +59,7 @@ export default function App() {
         <Link className="logo" to="/">Опросы</Link>
         <nav>
           <Link to="/">Главная</Link>
+          <Link to="/history">История</Link>
           <Link to="/login">Войти</Link>
         </nav>
       </header>
@@ -65,6 +67,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<PollList />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/history" element={<HistoryPage />} />
         <Route path="/polls/:pollId" element={<PollPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
