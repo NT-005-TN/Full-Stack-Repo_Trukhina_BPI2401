@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -104,3 +104,39 @@ class PollRead(BaseModel):
     owner_id: int
     questions: List[QuestionRead]
     model_config = ConfigDict(from_attributes=True)
+
+
+class AnswerCreate(BaseModel):
+    question_id: int
+    option_id: int
+
+
+class SubmissionCreate(BaseModel):
+    user_id: Optional[int] = None
+    answers: List[AnswerCreate] = Field(min_length=1)
+
+
+class SubmissionRead(BaseModel):
+    id: int
+    poll_id: int
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class OptionResult(BaseModel):
+    option_id: int
+    text: str
+    votes: int
+
+
+class QuestionResult(BaseModel):
+    question_id: int
+    text: str
+    total_votes: int
+    options: List[OptionResult]
+
+
+class PollResults(BaseModel):
+    poll_id: int
+    title: str
+    questions: List[QuestionResult]
