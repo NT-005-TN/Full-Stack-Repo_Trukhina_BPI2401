@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { Button, Chip, TextField } from '@mui/material'
 import AuthPage from './AuthPage'
 import CreatePollPage from './CreatePollPage'
@@ -80,24 +80,56 @@ function NotFound() {
 }
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    sessionStorage.getItem('isLoggedIn') === 'true',
+  )
+
+  function login() {
+    sessionStorage.setItem('isLoggedIn', 'true')
+    setIsLoggedIn(true)
+  }
+
+  function logout() {
+    sessionStorage.removeItem('isLoggedIn')
+    setIsLoggedIn(false)
+  }
+
   return (
     <>
       <header>
         <Link className="logo" to="/">Опросы</Link>
         <nav>
           <Link to="/">Главная</Link>
-          <Link to="/create">Создать</Link>
-          <Link to="/history">История</Link>
-          <Link to="/login">Войти</Link>
+          {isLoggedIn && <Link to="/create">Создать</Link>}
+          {isLoggedIn && <Link to="/history">История</Link>}
+          {isLoggedIn ? (
+            <Button color="inherit" component={Link} onClick={logout} to="/">
+              Выйти
+            </Button>
+          ) : (
+            <Link to="/login">Войти</Link>
+          )}
         </nav>
       </header>
 
       <Routes>
         <Route path="/" element={<PollList />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/create" element={<CreatePollPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/manage/:pollId" element={<ManagePollPage />} />
+        <Route
+          path="/login"
+          element={<AuthPage onGuest={logout} onLogin={login} />}
+        />
+        <Route
+          path="/create"
+          element={isLoggedIn ? <CreatePollPage /> : <Navigate replace to="/login" />}
+        />
+        <Route
+          path="/history"
+          element={isLoggedIn ? <HistoryPage /> : <Navigate replace to="/login" />}
+        />
+        <Route
+          path="/manage/:pollId"
+          element={isLoggedIn ? <ManagePollPage /> : <Navigate replace to="/login" />}
+        />
         <Route path="/polls/:pollId" element={<PollInfoPage />} />
         <Route path="/polls/:pollId/vote" element={<PollPage />} />
         <Route path="/polls/:pollId/results" element={<ResultsPage />} />

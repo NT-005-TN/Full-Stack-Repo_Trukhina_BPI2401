@@ -1,19 +1,24 @@
 import { FormEvent, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Alert, Button, Tab, Tabs, TextField } from '@mui/material'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button, Tab, Tabs, TextField } from '@mui/material'
 
-export default function AuthPage() {
+type AuthPageProps = {
+  onLogin: () => void
+  onGuest: () => void
+}
+
+export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [tab, setTab] = useState(0)
-  const [message, setMessage] = useState('')
+  const navigate = useNavigate()
 
   function submitForm(event: FormEvent) {
     event.preventDefault()
-    setMessage(tab === 0 ? 'Вход выполнен.' : 'Регистрация выполнена.')
+    onLogin()
+    navigate('/')
   }
 
   function changeTab(newTab: number) {
     setTab(newTab)
-    setMessage('')
   }
 
   return (
@@ -24,8 +29,6 @@ export default function AuthPage() {
         <Tab label="Вход" />
         <Tab label="Регистрация" />
       </Tabs>
-
-      {message && <Alert severity="success">{message}</Alert>}
 
       <form className="card form auth-form" onSubmit={submitForm}>
         {tab === 1 && <TextField required label="Имя" />}
@@ -39,7 +42,7 @@ export default function AuthPage() {
           {tab === 0 ? 'Войти' : 'Зарегистрироваться'}
         </Button>
 
-        <Button component={Link} to="/" variant="outlined">
+        <Button component={Link} onClick={onGuest} to="/" variant="outlined">
           Продолжить как гость
         </Button>
         <p className="hint">
