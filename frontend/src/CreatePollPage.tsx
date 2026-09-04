@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react'
-import { Alert, Button, MenuItem, TextField } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { Button, MenuItem, TextField } from '@mui/material'
+import { CreatedPoll } from './types'
 
 type Question = {
   id: number
@@ -7,7 +9,12 @@ type Question = {
   options: string[]
 }
 
-export default function CreatePollPage() {
+type CreatePollPageProps = {
+  onSave: (poll: CreatedPoll) => void
+}
+
+export default function CreatePollPage({ onSave }: CreatePollPageProps) {
+  const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [access, setAccess] = useState('public')
@@ -15,7 +22,6 @@ export default function CreatePollPage() {
   const [questions, setQuestions] = useState<Question[]>([
     { id: 1, text: '', options: ['', ''] },
   ])
-  const [message, setMessage] = useState('')
 
   function changeQuestion(questionIndex: number, text: string) {
     const newQuestions = [...questions]
@@ -59,17 +65,18 @@ export default function CreatePollPage() {
     const submitEvent = event.nativeEvent as SubmitEvent
     const button = submitEvent.submitter as HTMLButtonElement
 
-    setMessage(
-      button.value === 'publish'
-        ? 'Опрос опубликован.'
-        : 'Опрос сохранён как черновик.',
-    )
+    onSave({
+      id: Date.now(),
+      title,
+      questionCount: questions.length,
+      status: button.value === 'publish' ? 'Активен' : 'Черновик',
+    })
+    navigate('/history')
   }
 
   return (
     <main>
       <h1>Создание опроса</h1>
-      {message && <Alert severity="success">{message}</Alert>}
 
       <form className="create-form" onSubmit={savePoll}>
         <section className="card form">

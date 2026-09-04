@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Chip, Tab, Tabs } from '@mui/material'
+import { CreatedPoll } from './types'
 
 const completedPolls = [
   { id: 1, title: 'Студенческие мероприятия', date: '4 сентября 2026' },
   { id: 2, title: 'Выбор формата занятий', date: '1 сентября 2026' },
 ]
 
-const createdPolls = [
-  { id: 1, title: 'Студенческие мероприятия', status: 'Черновик' },
-]
+type HistoryPageProps = {
+  createdPolls: CreatedPoll[]
+}
 
-export default function HistoryPage() {
+export default function HistoryPage({ createdPolls }: HistoryPageProps) {
   const [tab, setTab] = useState(0)
 
   return (
@@ -35,7 +36,7 @@ export default function HistoryPage() {
         {tab === 1 && createdPolls.map((poll) => (
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
-            <p>Вы создатель этого опроса.</p>
+            <p>Вопросов: {poll.questionCount}</p>
             <Chip
               color={poll.status === 'Активен' ? 'success' : 'default'}
               label={poll.status}

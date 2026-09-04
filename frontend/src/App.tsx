@@ -8,6 +8,7 @@ import ManagePollPage from './ManagePollPage'
 import PollInfoPage from './PollInfoPage'
 import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
+import { CreatedPoll, PollStatus } from './types'
 
 const polls = [
   {
@@ -83,6 +84,9 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
     sessionStorage.getItem('isLoggedIn') === 'true',
   )
+  const [createdPolls, setCreatedPolls] = useState<CreatedPoll[]>([
+    { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
+  ])
 
   function login() {
     sessionStorage.setItem('isLoggedIn', 'true')
@@ -92,6 +96,16 @@ export default function App() {
   function logout() {
     sessionStorage.removeItem('isLoggedIn')
     setIsLoggedIn(false)
+  }
+
+  function addCreatedPoll(newPoll: CreatedPoll) {
+    setCreatedPolls([...createdPolls, newPoll])
+  }
+
+  function changePollStatus(pollId: number, status: PollStatus) {
+    setCreatedPolls(createdPolls.map((poll) =>
+      poll.id === pollId ? { ...poll, status } : poll,
+    ))
   }
 
   return (
@@ -120,15 +134,21 @@ export default function App() {
         />
         <Route
           path="/create"
-          element={isLoggedIn ? <CreatePollPage /> : <Navigate replace to="/login" />}
+          element={isLoggedIn
+            ? <CreatePollPage onSave={addCreatedPoll} />
+            : <Navigate replace to="/login" />}
         />
         <Route
           path="/history"
-          element={isLoggedIn ? <HistoryPage /> : <Navigate replace to="/login" />}
+          element={isLoggedIn
+            ? <HistoryPage createdPolls={createdPolls} />
+            : <Navigate replace to="/login" />}
         />
         <Route
           path="/manage/:pollId"
-          element={isLoggedIn ? <ManagePollPage /> : <Navigate replace to="/login" />}
+          element={isLoggedIn
+            ? <ManagePollPage polls={createdPolls} onStatusChange={changePollStatus} />
+            : <Navigate replace to="/login" />}
         />
         <Route path="/polls/:pollId" element={<PollInfoPage />} />
         <Route path="/polls/:pollId/vote" element={<PollPage />} />
