@@ -23,6 +23,8 @@ export default function PollPage() {
 
   const question = poll.questions[questionIndex]
   const currentAnswer = answers[questionIndex] || ''
+  const answeredCount = answers.filter(Boolean).length
+  const allQuestionsAnswered = answeredCount === poll.questions.length
 
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]
@@ -58,6 +60,10 @@ export default function PollPage() {
     return (
       <main className="small-page">
         <h1>Проверьте ответы</h1>
+        <Alert severity={allQuestionsAnswered ? 'success' : 'warning'}>
+          Заполнено вопросов: {answeredCount} из {poll.questions.length}.
+          {!allQuestionsAnswered && ' Ответьте на пропущенные вопросы.'}
+        </Alert>
         <div className="card review-list">
           {poll.questions.map((item, index) => (
             <div key={item.id}>
@@ -76,7 +82,11 @@ export default function PollPage() {
         </div>
         <div className="actions">
           <Button onClick={() => setIsReview(false)}>Назад</Button>
-          <Button onClick={() => setIsConfirmOpen(true)} variant="contained">
+          <Button
+            disabled={!allQuestionsAnswered}
+            onClick={() => setIsConfirmOpen(true)}
+            variant="contained"
+          >
             Отправить ответы
           </Button>
         </div>
