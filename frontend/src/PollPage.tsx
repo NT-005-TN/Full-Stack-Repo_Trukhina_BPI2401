@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Alert,
@@ -14,9 +14,21 @@ import {
 } from '@mui/material'
 import { poll } from './pollData'
 
+function loadAnswers() {
+  const savedAnswers = sessionStorage.getItem('pollAnswers')
+
+  try {
+    return savedAnswers ? JSON.parse(savedAnswers) : []
+  } catch {
+    return []
+  }
+}
+
 export default function PollPage() {
-  const [questionIndex, setQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState<string[]>([])
+  const [questionIndex, setQuestionIndex] = useState(
+    Number(sessionStorage.getItem('pollQuestion') || 0),
+  )
+  const [answers, setAnswers] = useState<string[]>(loadAnswers)
   const [isReview, setIsReview] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -25,6 +37,11 @@ export default function PollPage() {
   const currentAnswer = answers[questionIndex] || ''
   const answeredCount = answers.filter(Boolean).length
   const allQuestionsAnswered = answeredCount === poll.questions.length
+
+  useEffect(() => {
+    sessionStorage.setItem('pollAnswers', JSON.stringify(answers))
+    sessionStorage.setItem('pollQuestion', String(questionIndex))
+  }, [answers, questionIndex])
 
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]
@@ -100,6 +117,8 @@ export default function PollPage() {
             <Button onClick={() => setIsConfirmOpen(false)}>Отмена</Button>
             <Button
               onClick={() => {
+                sessionStorage.removeItem('pollAnswers')
+                sessionStorage.removeItem('pollQuestion')
                 setIsConfirmOpen(false)
                 setIsFinished(true)
               }}
