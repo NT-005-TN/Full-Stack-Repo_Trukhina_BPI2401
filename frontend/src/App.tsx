@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
-import { Button } from '@mui/material'
+import { Button, Chip, TextField } from '@mui/material'
 import AuthPage from './AuthPage'
 import CreatePollPage from './CreatePollPage'
 import HistoryPage from './HistoryPage'
@@ -9,21 +10,50 @@ import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
 
 const polls = [
-  { id: 1, title: 'Студенческие мероприятия', questions: 3 },
-  { id: 2, title: 'Выбор формата занятий', questions: 4 },
+  {
+    id: 1,
+    title: 'Студенческие мероприятия',
+    questions: 3,
+    access: 'Для всех',
+    status: 'Активен',
+  },
+  {
+    id: 2,
+    title: 'Выбор формата занятий',
+    questions: 4,
+    access: 'После входа',
+    status: 'Активен',
+  },
 ]
 
 function PollList() {
+  const [search, setSearch] = useState('')
+  const visiblePolls = polls.filter((poll) =>
+    poll.title.toLowerCase().includes(search.toLowerCase()),
+  )
+
   return (
     <main>
       <h1>Доступные опросы</h1>
       <p>Выберите опрос, чтобы принять участие.</p>
 
+      <TextField
+        className="search-field"
+        fullWidth
+        label="Поиск по названию"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
+
       <div className="poll-list">
-        {polls.map((poll) => (
+        {visiblePolls.map((poll) => (
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
             <p>Вопросов: {poll.questions}</p>
+            <div className="poll-tags">
+              <Chip color="success" label={poll.status} size="small" />
+              <Chip label={poll.access} size="small" />
+            </div>
             <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
               Открыть опрос
             </Button>
@@ -34,6 +64,7 @@ function PollList() {
             )}
           </article>
         ))}
+        {visiblePolls.length === 0 && <p>Опросы не найдены.</p>}
       </div>
     </main>
   )

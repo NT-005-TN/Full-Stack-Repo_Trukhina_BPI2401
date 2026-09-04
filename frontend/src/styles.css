@@ -51,6 +51,16 @@ main {
   gap: 20px;
 }
 
+.search-field {
+  margin: 16px 0 24px !important;
+}
+
+.poll-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .card {
   padding: 24px;
   border-radius: 14px;
