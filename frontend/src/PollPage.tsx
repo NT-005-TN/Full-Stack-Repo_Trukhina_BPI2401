@@ -42,6 +42,9 @@ export default function PollPage() {
         <Button component={Link} to="/" variant="contained">
           Вернуться к опросам
         </Button>
+        <Button component={Link} to={`/polls/${poll.id}/results`}>
+          Посмотреть результаты
+        </Button>
       </main>
     )
   }

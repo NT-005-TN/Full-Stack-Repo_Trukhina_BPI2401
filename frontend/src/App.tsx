@@ -3,6 +3,7 @@ import { Button, TextField } from '@mui/material'
 import CreatePollPage from './CreatePollPage'
 import HistoryPage from './HistoryPage'
 import PollPage from './PollPage'
+import ResultsPage from './ResultsPage'
 
 const polls = [
   { id: 1, title: 'Студенческие мероприятия', questions: 3 },
@@ -23,6 +24,11 @@ function PollList() {
             <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
               Пройти опрос
             </Button>
+            {poll.id === 1 && (
+              <Button component={Link} to={`/polls/${poll.id}/results`}>
+                Результаты
+              </Button>
+            )}
           </article>
         ))}
       </div>
@@ -72,6 +78,7 @@ export default function App() {
         <Route path="/create" element={<CreatePollPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/polls/:pollId" element={<PollPage />} />
+        <Route path="/polls/:pollId/results" element={<ResultsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
