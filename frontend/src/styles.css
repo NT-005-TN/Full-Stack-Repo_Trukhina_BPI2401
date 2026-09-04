@@ -146,6 +146,17 @@ main {
   margin-top: 20px;
 }
 
+.poll-info {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.poll-info h2,
+.poll-info p {
+  margin: 0;
+}
+
 @media (max-width: 600px) {
   header {
     padding: 16px;

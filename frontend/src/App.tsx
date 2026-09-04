@@ -4,6 +4,7 @@ import AuthPage from './AuthPage'
 import CreatePollPage from './CreatePollPage'
 import HistoryPage from './HistoryPage'
 import ManagePollPage from './ManagePollPage'
+import PollInfoPage from './PollInfoPage'
 import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
 
@@ -24,7 +25,7 @@ function PollList() {
             <h2>{poll.title}</h2>
             <p>Вопросов: {poll.questions}</p>
             <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
-              Пройти опрос
+              Открыть опрос
             </Button>
             {poll.id === 1 && (
               <Button component={Link} to={`/polls/${poll.id}/results`}>
@@ -66,7 +67,8 @@ export default function App() {
         <Route path="/create" element={<CreatePollPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/manage/:pollId" element={<ManagePollPage />} />
-        <Route path="/polls/:pollId" element={<PollPage />} />
+        <Route path="/polls/:pollId" element={<PollInfoPage />} />
+        <Route path="/polls/:pollId/vote" element={<PollPage />} />
         <Route path="/polls/:pollId/results" element={<ResultsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
