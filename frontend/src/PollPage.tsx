@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import {
   Alert,
   Button,
@@ -24,9 +24,14 @@ function loadAnswers(key: string) {
   }
 }
 
-export default function PollPage() {
+type PollPageProps = {
+  isLoggedIn: boolean
+}
+
+export default function PollPage({ isLoggedIn }: PollPageProps) {
   const { pollId } = useParams()
-  const poll = polls.find((item) => item.id === Number(pollId)) || polls[0]
+  const selectedPoll = polls.find((item) => item.id === Number(pollId))
+  const poll = selectedPoll || polls[0]
   const answersKey = `pollAnswers-${poll.id}`
   const questionKey = `pollQuestion-${poll.id}`
   const [questionIndex, setQuestionIndex] = useState(
@@ -46,6 +51,14 @@ export default function PollPage() {
     sessionStorage.setItem(answersKey, JSON.stringify(answers))
     sessionStorage.setItem(questionKey, String(questionIndex))
   }, [answers, answersKey, questionIndex, questionKey])
+
+  if (!selectedPoll) {
+    return <main><h1>Опрос не найден</h1></main>
+  }
+
+  if (poll.access === 'После входа' && !isLoggedIn) {
+    return <Navigate replace to="/login" />
+  }
 
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]

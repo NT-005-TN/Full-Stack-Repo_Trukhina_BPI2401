@@ -1,15 +1,23 @@
-import { useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import { LinearProgress } from '@mui/material'
 import { polls } from './pollData'
 
 const voteCounts = [18, 12, 10, 7]
 
-export default function ResultsPage() {
+type ResultsPageProps = {
+  isLoggedIn: boolean
+}
+
+export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
 
   if (!poll) {
     return <main><h1>Результаты не найдены</h1></main>
+  }
+
+  if (poll.access === 'После входа' && !isLoggedIn) {
+    return <Navigate replace to="/login" />
   }
 
   return (

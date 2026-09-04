@@ -1,13 +1,21 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
 import { polls } from './pollData'
 
-export default function PollInfoPage() {
+type PollInfoPageProps = {
+  isLoggedIn: boolean
+}
+
+export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
 
   if (!poll) {
     return <main><h1>Опрос не найден</h1></main>
+  }
+
+  if (poll.access === 'После входа' && !isLoggedIn) {
+    return <Navigate replace to="/login" />
   }
 
   return (

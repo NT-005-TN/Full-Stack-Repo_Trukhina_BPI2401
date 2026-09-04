@@ -134,9 +134,9 @@ export default function App() {
             ? <ManagePollPage polls={createdPolls} onStatusChange={changePollStatus} />
             : <Navigate replace to="/login" />}
         />
-        <Route path="/polls/:pollId" element={<PollInfoPage />} />
-        <Route path="/polls/:pollId/vote" element={<PollPage />} />
-        <Route path="/polls/:pollId/results" element={<ResultsPage />} />
+        <Route path="/polls/:pollId" element={<PollInfoPage isLoggedIn={isLoggedIn} />} />
+        <Route path="/polls/:pollId/vote" element={<PollPage isLoggedIn={isLoggedIn} />} />
+        <Route path="/polls/:pollId/results" element={<ResultsPage isLoggedIn={isLoggedIn} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
