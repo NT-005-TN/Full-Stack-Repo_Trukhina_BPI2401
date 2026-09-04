@@ -110,6 +110,35 @@ npm run dev
 npm run build
 ```
 
+## Лабораторная работа №2
+
+Backend находится в каталоге `backend` и использует FastAPI, PostgreSQL и SQLAlchemy.
+Параметры подключения к базе данных читаются из окружения; пример без секретов
+сохранён в `backend/.env.example`.
+
+Первоначальная настройка backend:
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload
+```
+
+После запуска проверка состояния API доступна по адресу
+`http://localhost:8000/health`, а интерактивная документация — по адресу
+`http://localhost:8000/docs`.
+
+Запуск тестов:
+
+```bash
+cd backend
+source .venv/bin/activate
+pytest
+```
+
 ## Основные маршруты
 
 - `/` — список и поиск опросов;
