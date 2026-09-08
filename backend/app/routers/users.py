@@ -9,10 +9,9 @@ router = APIRouter(prefix="/users", tags=["Пользователи"])
 
 @router.get("", response_model=list[schemas.UserRead])
 def read_users(
-    db: Session = Depends(get_db),
-    _: models.User = Depends(auth.get_current_user),
+    current: models.User = Depends(auth.get_current_user),
 ):
-    return crud.list_users(db)
+    return [current]
 
 
 @router.get("/{user_id}", response_model=schemas.UserRead)

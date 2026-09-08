@@ -88,3 +88,17 @@ def test_user_with_poll_cannot_be_deleted(client_and_session) -> None:
     response = client.delete(f"/users/{user['id']}", headers=headers)
     assert response.status_code == 409
     assert response.json()["detail"] == "Сначала удалите опросы пользователя"
+
+
+def test_user_cannot_read_another_profile(client_and_session) -> None:
+    client, _ = client_and_session
+    first = client.post(
+        "/users", json={"email": "first@example.com", "password": "password123"}
+    ).json()
+    second = client.post(
+        "/users", json={"email": "second@example.com", "password": "password123"}
+    ).json()
+    headers = {"Authorization": f"Bearer {create_access_token(second['id'])}"}
+
+    assert client.get(f"/users/{first['id']}", headers=headers).status_code == 403
+    assert client.get("/users", headers=headers).json() == [second]

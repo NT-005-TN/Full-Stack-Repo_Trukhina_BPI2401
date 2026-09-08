@@ -88,7 +88,7 @@ Frontend реализован на демонстрационных данных
 
 ## Запуск
 
-Перейдите в корень личного репозитория и выберите frontend-ветку:
+Для просмотра отдельной ЛР №1 выберите её frontend-ветку:
 
 ```bash
 git switch front
@@ -130,7 +130,7 @@ uvicorn app.main:app --reload
 
 Перед командой `python -m app.init_db` создайте пустую локальную базу PostgreSQL
 с именем `polls` и укажите строку подключения в `backend/.env`. Команда создаст
-семь связанных таблиц из моделей SQLAlchemy. Файл `.env` исключён из Git;
+восемь связанных таблиц из моделей SQLAlchemy. Файл `.env` исключён из Git;
 репозиторий содержит только безопасный пример `.env.example`.
 
 После запуска проверка состояния API доступна по адресу
@@ -154,6 +154,7 @@ pytest
 - `participations` — отдельный факт участия пользователя в опросе;
 - `submissions` — анонимная отправка набора ответов;
 - `answers` — выбранный вариант для каждого вопроса отправки.
+- `refresh_tokens` — хеши refresh-токенов, сроки действия и признаки отзыва.
 
 Вопросы связаны с опросом, варианты — с вопросом, а ответы — с анонимной
 отправкой. У `submissions` намеренно нет ссылки на пользователя: создатель
@@ -262,6 +263,39 @@ token является JWT с подписью HMAC-SHA256 и коротким �
 указать в `frontend/.env` через `VITE_API_URL`; безопасный пример находится в
 `frontend/.env.example`. Backend разрешает локальный frontend, запущенный как через
 `localhost`, так и через `127.0.0.1`.
+
+### Запуск итоговой версии
+
+В корне репозитория выберите итоговую ветку и подготовьте PostgreSQL:
+
+```bash
+git switch integration
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python -m app.init_db
+uvicorn app.main:app --reload
+```
+
+В отдельном терминале запустите frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+После этого откройте `http://localhost:5173`. Для первой проверки создайте
+пользователя через вкладку «Регистрация», затем создайте и опубликуйте опрос.
+
+Итоговая проверка проекта:
+
+```bash
+cd backend && source .venv/bin/activate && pytest
+cd ../frontend && npm run build
+```
 
 ## Скриншоты
 
