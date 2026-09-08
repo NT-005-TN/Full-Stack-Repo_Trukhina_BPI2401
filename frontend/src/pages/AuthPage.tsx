@@ -19,8 +19,8 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   async function submitForm(event: FormEvent) {
     event.preventDefault()
 
-    if (password.length < 6) {
-      setError('Пароль должен содержать не менее 6 символов.')
+    if (password.length < 8) {
+      setError('Пароль должен содержать не менее 8 символов.')
       return
     }
 
@@ -58,7 +58,6 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
       {error && <Alert severity="error">{error}</Alert>}
 
       <form className="card form auth-form" onSubmit={submitForm}>
-        {tab === 1 && <TextField required label="Имя" />}
         <TextField
           required
           label="Электронная почта"
