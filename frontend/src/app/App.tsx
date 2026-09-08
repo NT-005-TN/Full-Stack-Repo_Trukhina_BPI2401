@@ -23,6 +23,14 @@ export default function App() {
       setIsLoggedIn(Boolean(user))
       setIsCheckingSession(false)
     })
+
+    function handleSessionEnd() {
+      setCurrentUser(null)
+      setIsLoggedIn(false)
+    }
+
+    window.addEventListener('auth-session-ended', handleSessionEnd)
+    return () => window.removeEventListener('auth-session-ended', handleSessionEnd)
   }, [])
 
   async function login(email: string, password: string, isRegistration: boolean) {

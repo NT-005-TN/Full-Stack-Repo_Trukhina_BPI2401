@@ -83,4 +83,5 @@ export async function logout() {
 export function clearTokens() {
   sessionStorage.removeItem('accessToken')
   sessionStorage.removeItem('refreshToken')
+  window.dispatchEvent(new Event('auth-session-ended'))
 }
