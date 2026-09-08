@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Button, MenuItem, TextField } from '@mui/material'
-import { CreatedPoll } from '../entities/poll/types'
+import { createPoll } from '../shared/api/polls'
 
 type Question = {
   id: number
@@ -9,11 +9,7 @@ type Question = {
   options: string[]
 }
 
-type CreatePollPageProps = {
-  onSave: (poll: CreatedPoll) => void
-}
-
-export default function CreatePollPage({ onSave }: CreatePollPageProps) {
+export default function CreatePollPage() {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -21,6 +17,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   const [resultsAccess, setResultsAccess] = useState('after_finish')
   const [endDate, setEndDate] = useState('')
   const [error, setError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
   const [questions, setQuestions] = useState<Question[]>([
     { id: 1, text: '', options: ['', ''] },
   ])
@@ -62,7 +59,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     setQuestions(newQuestions)
   }
 
-  function savePoll(event: FormEvent) {
+  async function savePoll(event: FormEvent) {
     event.preventDefault()
     const submitEvent = event.nativeEvent as SubmitEvent
     const button = submitEvent.submitter as HTMLButtonElement
@@ -83,13 +80,22 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
 
     setError('')
 
-    onSave({
-      id: Date.now(),
-      title,
-      questionCount: questions.length,
-      status: button.value === 'publish' ? 'Активен' : 'Черновик',
-    })
-    navigate('/history')
+    setIsSaving(true)
+    try {
+      await createPoll({
+        title, description, access, results_access: resultsAccess, end_date: endDate,
+        status: button.value === 'publish' ? 'active' : 'draft',
+        questions: questions.map((question) => ({
+          text: question.text,
+          options: question.options.map((text) => ({ text })),
+        })),
+      })
+      navigate('/history')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Не удалось сохранить опрос.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -190,10 +196,10 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
           <Button onClick={addQuestion} variant="outlined">
             Добавить вопрос
           </Button>
-          <Button name="action" type="submit" value="draft">
+          <Button disabled={isSaving} name="action" type="submit" value="draft">
             Сохранить черновик
           </Button>
-          <Button name="action" type="submit" value="publish" variant="contained">
+          <Button disabled={isSaving} name="action" type="submit" value="publish" variant="contained">
             Опубликовать
           </Button>
         </div>

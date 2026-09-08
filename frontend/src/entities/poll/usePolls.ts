@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { polls as demoPolls } from './data'
 import { Poll } from './types'
+import { getPolls } from '../../shared/api/polls'
 
 type PollsState = {
   polls: Poll[]
@@ -16,23 +16,14 @@ export function usePolls(): PollsState {
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const shouldFail = searchParams.get('error') === '1' && attempt === 0
-    const delay = Number(searchParams.get('delay')) || 400
-
     setIsLoading(true)
     setError('')
-
-    const timer = window.setTimeout(() => {
-      if (shouldFail) {
-        setError('Не удалось загрузить опросы. Попробуйте ещё раз.')
-      } else {
-        setPolls(demoPolls)
-      }
-      setIsLoading(false)
-    }, delay)
-
-    return () => window.clearTimeout(timer)
+    getPolls()
+      .then(setPolls)
+      .catch((requestError) => setError(
+        requestError instanceof Error ? requestError.message : 'Не удалось загрузить опросы.',
+      ))
+      .finally(() => setIsLoading(false))
   }, [attempt])
 
   return {

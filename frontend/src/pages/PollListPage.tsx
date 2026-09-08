@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button, Chip, TextField } from '@mui/material'
 import { usePolls } from '../entities/poll/usePolls'
 import DataState from '../shared/ui/DataState'
+import { statusLabels } from '../entities/poll/types'
 
 export default function PollListPage() {
   const [search, setSearch] = useState('')
@@ -35,13 +36,13 @@ export default function PollListPage() {
                 <h2>{poll.title}</h2>
                 <p>Вопросов: {poll.questions.length}</p>
                 <div className="poll-tags">
-                  <Chip color="success" label={poll.status} size="small" />
-                  <Chip label={poll.access} size="small" />
+                  <Chip color="success" label={statusLabels[poll.status]} size="small" />
+                  <Chip label={poll.access === 'public' ? 'Для всех' : 'После входа'} size="small" />
                 </div>
                 <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
                   Открыть опрос
                 </Button>
-                {poll.id === 1 && (
+                {poll.results_access !== 'hidden' && (
                   <Button component={Link} to={`/polls/${poll.id}/results`}>
                     Результаты
                   </Button>

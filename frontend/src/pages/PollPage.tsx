@@ -12,7 +12,9 @@ import {
   Radio,
   RadioGroup,
 } from '@mui/material'
-import { polls } from '../entities/poll/data'
+import { usePoll } from '../entities/poll/usePoll'
+import { submitPoll } from '../shared/api/polls'
+import DataState from '../shared/ui/DataState'
 import PageMessage from '../shared/ui/PageMessage'
 
 function loadAnswers(key: string) {
@@ -31,44 +33,68 @@ type PollPageProps = {
 
 export default function PollPage({ isLoggedIn }: PollPageProps) {
   const { pollId } = useParams()
-  const selectedPoll = polls.find((item) => item.id === Number(pollId))
-  const poll = selectedPoll || polls[0]
-  const answersKey = `pollAnswers-${poll.id}`
-  const questionKey = `pollQuestion-${poll.id}`
+  const numericPollId = Number(pollId)
+  const { poll, isLoading, error: loadError } = usePoll(numericPollId)
+  const answersKey = `pollAnswers-${numericPollId}`
+  const questionKey = `pollQuestion-${numericPollId}`
   const [questionIndex, setQuestionIndex] = useState(
     Number(sessionStorage.getItem(questionKey) || 0),
   )
-  const [answers, setAnswers] = useState<string[]>(() => loadAnswers(answersKey))
+  const [answers, setAnswers] = useState<number[]>(() => loadAnswers(answersKey))
   const [isReview, setIsReview] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-
-  const question = poll.questions[questionIndex]
-  const currentAnswer = answers[questionIndex] || ''
-  const answeredCount = answers.filter(Boolean).length
-  const allQuestionsAnswered = answeredCount === poll.questions.length
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     sessionStorage.setItem(answersKey, JSON.stringify(answers))
     sessionStorage.setItem(questionKey, String(questionIndex))
   }, [answers, answersKey, questionIndex, questionKey])
 
-  if (!selectedPoll) {
-    return <PageMessage title="Опрос не найден" linkText="Вернуться к опросам" linkTo="/" />
-  }
+  if (isLoading) return <main><DataState type="loading" message="Загружаем вопросы…" /></main>
+  if (loadError || !poll) return <PageMessage title={loadError || "Опрос не найден"} linkText="Вернуться к опросам" linkTo="/" />
 
-  if (poll.access === 'После входа' && !isLoggedIn) {
+  if (poll.access === 'registered' && !isLoggedIn) {
     return <Navigate replace to="/login" />
   }
 
-  function selectAnswer(answer: string) {
+  const question = poll.questions[questionIndex]
+  const questionCount = poll.questions.length
+  const currentAnswer = answers[questionIndex] || 0
+  const answeredCount = answers.filter(Boolean).length
+  const allQuestionsAnswered = answeredCount === poll.questions.length
+
+  function selectAnswer(answer: number) {
     const newAnswers = [...answers]
     newAnswers[questionIndex] = answer
     setAnswers(newAnswers)
   }
 
+  async function sendAnswers() {
+    if (!poll) return
+    setIsSubmitting(true)
+    setSubmitError('')
+    try {
+      await submitPoll(poll.id, {
+        answers: poll.questions.map((item, index) => ({
+          question_id: item.id, option_id: answers[index],
+        })),
+      })
+      sessionStorage.removeItem(answersKey)
+      sessionStorage.removeItem(questionKey)
+      setIsConfirmOpen(false)
+      setIsFinished(true)
+    } catch (requestError) {
+      setSubmitError(requestError instanceof Error ? requestError.message : 'Не удалось отправить ответы.')
+      setIsConfirmOpen(false)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   function goNext() {
-    if (questionIndex < poll.questions.length - 1) {
+    if (questionIndex < questionCount - 1) {
       setQuestionIndex(questionIndex + 1)
     } else {
       setIsReview(true)
@@ -103,7 +129,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
           {poll.questions.map((item, index) => (
             <div key={item.id}>
               <strong>{index + 1}. {item.text}</strong>
-              <p>{answers[index]}</p>
+              <p>{item.options.find((option) => option.id === answers[index])?.text || 'Нет ответа'}</p>
               <Button
                 onClick={() => {
                   setQuestionIndex(index)
@@ -116,6 +142,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
           ))}
         </div>
         <div className="actions">
+          {submitError && <Alert severity="error">{submitError}</Alert>}
           <Button onClick={() => setIsReview(false)}>Назад</Button>
           <Button
             disabled={!allQuestionsAnswered}
@@ -134,12 +161,8 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
           <DialogActions>
             <Button onClick={() => setIsConfirmOpen(false)}>Отмена</Button>
             <Button
-              onClick={() => {
-                sessionStorage.removeItem(answersKey)
-                sessionStorage.removeItem(questionKey)
-                setIsConfirmOpen(false)
-                setIsFinished(true)
-              }}
+              disabled={isSubmitting}
+              onClick={sendAnswers}
               variant="contained"
             >
               Подтвердить отправку
@@ -164,14 +187,14 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
         <h2>{question.text}</h2>
         <RadioGroup
           value={currentAnswer}
-          onChange={(event) => selectAnswer(event.target.value)}
+          onChange={(event) => selectAnswer(Number(event.target.value))}
         >
           {question.options.map((option) => (
             <FormControlLabel
-              key={option}
-              value={option}
+              key={option.id}
+              value={option.id}
               control={<Radio />}
-              label={option}
+              label={option.text}
             />
           ))}
         </RadioGroup>

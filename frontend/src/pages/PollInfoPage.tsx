@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { polls } from '../entities/poll/data'
+import { usePoll } from '../entities/poll/usePoll'
+import DataState from '../shared/ui/DataState'
 import PageMessage from '../shared/ui/PageMessage'
 
 type PollInfoPageProps = {
@@ -9,13 +10,14 @@ type PollInfoPageProps = {
 
 export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
   const { pollId } = useParams()
-  const poll = polls.find((item) => item.id === Number(pollId))
+  const { poll, isLoading, error } = usePoll(Number(pollId))
 
-  if (!poll) {
-    return <PageMessage title="Опрос не найден" linkText="Вернуться к опросам" linkTo="/" />
+  if (isLoading) return <main><DataState type="loading" message="Загружаем опрос…" /></main>
+  if (error || !poll) {
+    return <PageMessage title={error || "Опрос не найден"} linkText="Вернуться к опросам" linkTo="/" />
   }
 
-  if (poll.access === 'После входа' && !isLoggedIn) {
+  if (poll.access === 'registered' && !isLoggedIn) {
     return <Navigate replace to="/login" />
   }
 

@@ -40,6 +40,7 @@ def poll_data() -> dict:
     return {
         "title": "Новый опрос",
         "description": "Описание",
+        "status": "active",
         "end_date": str(date.today() + timedelta(days=7)),
         "owner_id": 1,
         "questions": [
@@ -72,6 +73,23 @@ def test_poll_crud(client: TestClient) -> None:
 
     assert client.delete(f"/polls/{poll_id}", headers=auth_headers()).status_code == 204
     assert client.get(f"/polls/{poll_id}").status_code == 404
+
+
+def test_private_poll_routes_require_owner(client: TestClient) -> None:
+    assert client.get("/polls/mine").status_code == 401
+    created = client.post("/polls", json=poll_data(), headers=auth_headers()).json()
+    mine = client.get("/polls/mine", headers=auth_headers())
+    assert mine.status_code == 200
+    assert mine.json()[0]["id"] == created["id"]
+
+    assert client.post(
+        "/users", json={"email": "other@example.com", "password": "password123"}
+    ).status_code == 201
+    other_headers = {"Authorization": f"Bearer {create_access_token(2)}"}
+    response = client.patch(
+        f"/polls/{created['id']}", json={"title": "Чужое изменение"}, headers=other_headers
+    )
+    assert response.status_code == 403
 
 
 def test_poll_validation_and_missing_owner(client: TestClient) -> None:

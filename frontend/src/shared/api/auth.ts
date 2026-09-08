@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:8000'
+export const API_URL = 'http://localhost:8000'
+
+export type User = { id: number; email: string }
 
 export type TokenPair = {
   access_token: string
@@ -52,9 +54,9 @@ export async function refreshAccessToken() {
   return true
 }
 
-export async function checkSession() {
+export async function getCurrentUser(): Promise<User | null> {
   const accessToken = sessionStorage.getItem('accessToken')
-  if (!accessToken) return false
+  if (!accessToken) return null
   let response = await fetch(`${API_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
@@ -63,7 +65,7 @@ export async function checkSession() {
       headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` },
     })
   }
-  return response.ok
+  return response.ok ? response.json() : null
 }
 
 export async function logout() {

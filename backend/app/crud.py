@@ -57,8 +57,25 @@ def delete_user(db: Session, user: models.User) -> bool:
 
 
 def list_polls(db: Session) -> list[models.Poll]:
-    statement = select(models.Poll).options(
+    statement = select(models.Poll).where(models.Poll.status == "active").options(
         selectinload(models.Poll.questions).selectinload(models.Question.options)
+    )
+    return list(db.scalars(statement).all())
+
+
+def list_user_polls(db: Session, user_id: int) -> list[models.Poll]:
+    statement = select(models.Poll).where(models.Poll.owner_id == user_id).options(
+        selectinload(models.Poll.questions).selectinload(models.Question.options)
+    )
+    return list(db.scalars(statement).all())
+
+
+def list_participated_polls(db: Session, user_id: int) -> list[models.Poll]:
+    statement = (
+        select(models.Poll)
+        .join(models.Participation)
+        .where(models.Participation.user_id == user_id)
+        .options(selectinload(models.Poll.questions).selectinload(models.Question.options))
     )
     return list(db.scalars(statement).all())
 

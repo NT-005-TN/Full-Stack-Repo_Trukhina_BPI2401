@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { Button } from '@mui/material'
-import { CreatedPoll, PollStatus } from '../entities/poll/types'
 import AuthPage from '../pages/AuthPage'
 import CreatePollPage from '../pages/CreatePollPage'
 import HistoryPage from '../pages/HistoryPage'
@@ -16,13 +15,12 @@ import * as authApi from '../shared/api/auth'
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
-  const [createdPolls, setCreatedPolls] = useState<CreatedPoll[]>([
-    { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
-  ])
+  const [currentUser, setCurrentUser] = useState<authApi.User | null>(null)
 
   useEffect(() => {
-    authApi.checkSession().then((valid) => {
-      setIsLoggedIn(valid)
+    authApi.getCurrentUser().then((user) => {
+      setCurrentUser(user)
+      setIsLoggedIn(Boolean(user))
       setIsCheckingSession(false)
     })
   }, [])
@@ -30,22 +28,14 @@ export default function App() {
   async function login(email: string, password: string, isRegistration: boolean) {
     if (isRegistration) await authApi.register(email, password)
     else await authApi.login(email, password)
+    setCurrentUser(await authApi.getCurrentUser())
     setIsLoggedIn(true)
   }
 
   async function logout() {
     await authApi.logout()
+    setCurrentUser(null)
     setIsLoggedIn(false)
-  }
-
-  function addCreatedPoll(newPoll: CreatedPoll) {
-    setCreatedPolls([...createdPolls, newPoll])
-  }
-
-  function changePollStatus(pollId: number, status: PollStatus) {
-    setCreatedPolls(createdPolls.map((poll) =>
-      poll.id === pollId ? { ...poll, status } : poll,
-    ))
   }
 
   return (
@@ -75,19 +65,19 @@ export default function App() {
         <Route
           path="/create"
           element={isLoggedIn
-            ? <CreatePollPage onSave={addCreatedPoll} />
+            ? <CreatePollPage />
             : <Navigate replace to="/login" />}
         />
         <Route
           path="/history"
           element={isLoggedIn
-            ? <HistoryPage createdPolls={createdPolls} />
+            ? <HistoryPage currentUserId={currentUser?.id || 0} />
             : <Navigate replace to="/login" />}
         />
         <Route
           path="/manage/:pollId"
           element={isLoggedIn
-            ? <ManagePollPage polls={createdPolls} onStatusChange={changePollStatus} />
+            ? <ManagePollPage />
             : <Navigate replace to="/login" />}
         />
         <Route path="/polls/:pollId" element={<PollInfoPage isLoggedIn={isLoggedIn} />} />

@@ -79,7 +79,7 @@ class PollCreate(BaseModel):
     access: Literal["public", "registered"] = "public"
     results_access: Literal["after_vote", "after_finish", "hidden"] = "after_finish"
     end_date: date
-    owner_id: int
+    owner_id: Optional[int] = None
     questions: List[QuestionCreate] = Field(min_length=1)
 
     @field_validator("end_date")

@@ -20,11 +20,33 @@ def read_polls(db: Session = Depends(get_db)):
     return crud.list_polls(db)
 
 
+@router.get("/mine", response_model=list[schemas.PollRead])
+def read_my_polls(
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user),
+):
+    return crud.list_user_polls(db, user.id)
+
+
+@router.get("/participated", response_model=list[schemas.PollRead])
+def read_participated_polls(
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user),
+):
+    return crud.list_participated_polls(db, user.id)
+
+
 @router.get("/{poll_id}", response_model=schemas.PollRead)
-def read_poll(poll_id: int, db: Session = Depends(get_db)):
+def read_poll(
+    poll_id: int,
+    db: Session = Depends(get_db),
+    user: Optional[models.User] = Depends(auth.get_optional_user),
+):
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
+    if poll.status == "draft" and (user is None or poll.owner_id != user.id):
+        raise HTTPException(status_code=403, detail="Черновик доступен только владельцу")
     return poll
 
 

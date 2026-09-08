@@ -94,6 +94,9 @@ def test_registered_user_cannot_vote_twice(voting_client) -> None:
     headers = {"Authorization": f"Bearer {create_access_token(1)}"}
     assert client.post(f"/polls/{poll['id']}/submissions", json=answer, headers=headers).status_code == 201
     assert client.post(f"/polls/{poll['id']}/submissions", json=answer, headers=headers).status_code == 409
+    history = client.get("/polls/participated", headers=headers)
+    assert history.status_code == 200
+    assert history.json()[0]["id"] == poll["id"]
 
 
 def test_submission_validation(voting_client) -> None:

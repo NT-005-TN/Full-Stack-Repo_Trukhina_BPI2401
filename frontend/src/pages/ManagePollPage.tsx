@@ -1,74 +1,52 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { Alert, Button, Chip } from '@mui/material'
-import { polls as demoPolls } from '../entities/poll/data'
-import { CreatedPoll, PollStatus } from '../entities/poll/types'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Alert, Button, Chip, TextField } from '@mui/material'
+import { statusLabels } from '../entities/poll/types'
+import { usePoll } from '../entities/poll/usePoll'
+import { deletePoll, updatePoll } from '../shared/api/polls'
+import DataState from '../shared/ui/DataState'
+import PageMessage from '../shared/ui/PageMessage'
 
-type ManagePollPageProps = {
-  polls: CreatedPoll[]
-  onStatusChange: (pollId: number, status: PollStatus) => void
-}
-
-export default function ManagePollPage({ polls, onStatusChange }: ManagePollPageProps) {
-  const { pollId } = useParams()
+export default function ManagePollPage() {
+  const id = Number(useParams().pollId)
+  const navigate = useNavigate()
+  const { poll, isLoading, error: loadError } = usePoll(id)
+  const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
-  const selectedPoll = polls.find((poll) => poll.id === Number(pollId))
-  const hasResults = demoPolls.some((poll) => poll.id === selectedPoll?.id)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  if (!selectedPoll) {
-    return <main><h1>Опрос не найден</h1></main>
+  if (isLoading) return <main><DataState type="loading" message="Загружаем опрос…" /></main>
+  if (loadError || !poll) return <PageMessage title={loadError || 'Опрос не найден'} linkText="К истории" linkTo="/history" />
+
+  async function save(changes: object, success: string) {
+    setSaving(true); setError('')
+    try { await updatePoll(id, changes); setMessage(success); window.location.reload() }
+    catch (reason) { setError(reason instanceof Error ? reason.message : 'Не удалось изменить опрос.') }
+    finally { setSaving(false) }
   }
 
-  function publishPoll() {
-    if (!selectedPoll) return
-    onStatusChange(selectedPoll.id, 'Активен')
-    setMessage('Опрос опубликован и доступен участникам.')
+  async function remove() {
+    if (!window.confirm('Удалить опрос и все связанные ответы?')) return
+    setSaving(true)
+    try { await deletePoll(id); navigate('/history') }
+    catch (reason) { setError(reason instanceof Error ? reason.message : 'Не удалось удалить опрос.'); setSaving(false) }
   }
 
-  function finishPoll() {
-    if (!selectedPoll) return
-    onStatusChange(selectedPoll.id, 'Завершён')
-    setMessage('Опрос завершён. Новые ответы больше не принимаются.')
-  }
-
-  return (
-    <main className="small-page">
-      <h1>Управление опросом</h1>
-      {message && <Alert severity="success">{message}</Alert>}
-
-      <section className="card manage-card">
-        <div className="section-title">
-          <h2>{selectedPoll.title}</h2>
-          <Chip
-            color={selectedPoll.status === 'Активен' ? 'success' : 'default'}
-            label={selectedPoll.status}
-          />
-        </div>
-
-        <p>Вопросов: {selectedPoll.questionCount}</p>
-        <p>Участников: {selectedPoll.status === 'Черновик' ? 0 : 40}</p>
-
-        <div className="manage-actions">
-          {selectedPoll.status === 'Черновик' && (
-            <Button onClick={publishPoll} variant="contained">
-              Опубликовать
-            </Button>
-          )}
-          {selectedPoll.status === 'Активен' && (
-            <Button color="error" onClick={finishPoll} variant="contained">
-              Завершить опрос
-            </Button>
-          )}
-          {selectedPoll.status !== 'Черновик' && hasResults && (
-            <Button component={Link} to={`/polls/${selectedPoll.id}/results`}>
-              Посмотреть результаты
-            </Button>
-          )}
-        </div>
-        {selectedPoll.status !== 'Черновик' && !hasResults && (
-          <p className="hint">Результаты появятся после получения ответов.</p>
-        )}
-      </section>
-    </main>
-  )
+  return <main className="small-page">
+    <h1>Управление опросом</h1>
+    {message && <Alert severity="success">{message}</Alert>}
+    {error && <Alert severity="error">{error}</Alert>}
+    <section className="card manage-card">
+      <div className="section-title"><h2>{poll.title}</h2><Chip label={statusLabels[poll.status]} /></div>
+      <p>Вопросов: {poll.questions.length}</p>
+      <TextField fullWidth label="Новое название" value={title} onChange={(event) => setTitle(event.target.value)} />
+      <div className="manage-actions">
+        <Button disabled={saving || !title.trim()} onClick={() => save({ title }, 'Название обновлено.')}>Сохранить название</Button>
+        {poll.status === 'draft' && <Button disabled={saving} variant="contained" onClick={() => save({ status: 'active' }, 'Опрос опубликован.')}>Опубликовать</Button>}
+        {poll.status === 'active' && <Button disabled={saving} color="warning" onClick={() => save({ status: 'finished' }, 'Опрос завершён.')}>Завершить</Button>}
+        <Button disabled={saving} color="error" onClick={remove}>Удалить</Button>
+      </div>
+    </section>
+  </main>
 }
