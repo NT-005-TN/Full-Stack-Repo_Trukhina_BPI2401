@@ -3,18 +3,20 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Alert, Button, Tab, Tabs, TextField } from '@mui/material'
 
 type AuthPageProps = {
-  onLogin: () => void
+  onLogin: (email: string, password: string, register: boolean) => Promise<void>
   onGuest: () => void
 }
 
 export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [tab, setTab] = useState(0)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeatedPassword, setRepeatedPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
-  function submitForm(event: FormEvent) {
+  async function submitForm(event: FormEvent) {
     event.preventDefault()
 
     if (password.length < 6) {
@@ -28,8 +30,15 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
     }
 
     setError('')
-    onLogin()
-    navigate('/')
+    setIsSubmitting(true)
+    try {
+      await onLogin(email, password, tab === 1)
+      navigate('/')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Ошибка входа.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function changeTab(newTab: number) {
@@ -50,7 +59,13 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
 
       <form className="card form auth-form" onSubmit={submitForm}>
         {tab === 1 && <TextField required label="Имя" />}
-        <TextField required label="Электронная почта" type="email" />
+        <TextField
+          required
+          label="Электронная почта"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
         <TextField
           required
           label="Пароль"
@@ -68,8 +83,8 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
           />
         )}
 
-        <Button type="submit" variant="contained">
-          {tab === 0 ? 'Войти' : 'Зарегистрироваться'}
+        <Button disabled={isSubmitting} type="submit" variant="contained">
+          {isSubmitting ? 'Подождите…' : tab === 0 ? 'Войти' : 'Зарегистрироваться'}
         </Button>
 
         <Button component={Link} onClick={onGuest} to="/" variant="outlined">

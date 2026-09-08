@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base, get_db
 from app.main import app
 from app.models import User
+from app.security import create_access_token
 
 
 @pytest.fixture()
@@ -44,11 +45,12 @@ def test_user_crud_and_password_hash(client_and_session) -> None:
         assert saved_user is not None
         assert saved_user.password_hash != "password123"
 
-    assert client.get("/users").json() == [created.json()]
-    updated = client.patch("/users/1", json={"email": "new@example.com"})
+    headers = {"Authorization": f"Bearer {create_access_token(1)}"}
+    assert client.get("/users", headers=headers).json() == [created.json()]
+    updated = client.patch("/users/1", json={"email": "new@example.com"}, headers=headers)
     assert updated.json()["email"] == "new@example.com"
-    assert client.delete("/users/1").status_code == 204
-    assert client.get("/users/1").status_code == 404
+    assert client.delete("/users/1", headers=headers).status_code == 204
+    assert client.get("/users/1", headers=headers).status_code == 401
 
 
 def test_duplicate_email_and_invalid_password(client_and_session) -> None:
@@ -80,8 +82,9 @@ def test_user_with_poll_cannot_be_deleted(client_and_session) -> None:
             }
         ],
     }
-    assert client.post("/polls", json=poll).status_code == 201
+    headers = {"Authorization": f"Bearer {create_access_token(user['id'])}"}
+    assert client.post("/polls", json=poll, headers=headers).status_code == 201
 
-    response = client.delete(f"/users/{user['id']}")
+    response = client.delete(f"/users/{user['id']}", headers=headers)
     assert response.status_code == 409
     assert response.json()["detail"] == "Сначала удалите опросы пользователя"

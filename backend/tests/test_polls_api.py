@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base, get_db
 from app.main import app
 from app.models import User
+from app.security import create_access_token
 
 
 @pytest.fixture()
@@ -50,8 +51,12 @@ def poll_data() -> dict:
     }
 
 
+def auth_headers() -> dict[str, str]:
+    return {"Authorization": f"Bearer {create_access_token(1)}"}
+
+
 def test_poll_crud(client: TestClient) -> None:
-    created = client.post("/polls", json=poll_data())
+    created = client.post("/polls", json=poll_data(), headers=auth_headers())
     assert created.status_code == 201
     poll_id = created.json()["id"]
     assert len(created.json()["questions"][0]["options"]) == 2
@@ -59,21 +64,23 @@ def test_poll_crud(client: TestClient) -> None:
     assert client.get("/polls").json()[0]["title"] == "Новый опрос"
     assert client.get(f"/polls/{poll_id}").status_code == 200
 
-    updated = client.patch(f"/polls/{poll_id}", json={"status": "active"})
+    updated = client.patch(
+        f"/polls/{poll_id}", json={"status": "active"}, headers=auth_headers()
+    )
     assert updated.status_code == 200
     assert updated.json()["status"] == "active"
 
-    assert client.delete(f"/polls/{poll_id}").status_code == 204
+    assert client.delete(f"/polls/{poll_id}", headers=auth_headers()).status_code == 204
     assert client.get(f"/polls/{poll_id}").status_code == 404
 
 
 def test_poll_validation_and_missing_owner(client: TestClient) -> None:
     invalid = poll_data()
     invalid["questions"][0]["options"] = [{"text": "Один вариант"}]
-    assert client.post("/polls", json=invalid).status_code == 422
+    assert client.post("/polls", json=invalid, headers=auth_headers()).status_code == 422
 
     missing_owner = poll_data()
     missing_owner["owner_id"] = 999
-    response = client.post("/polls", json=missing_owner)
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Владелец опроса не найден"
+    response = client.post("/polls", json=missing_owner, headers=auth_headers())
+    assert response.status_code == 201
+    assert response.json()["owner_id"] == 1

@@ -36,6 +36,21 @@ class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class TokenPair(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
 class OptionCreate(BaseModel):
     text: str = Field(min_length=1, max_length=300)
 

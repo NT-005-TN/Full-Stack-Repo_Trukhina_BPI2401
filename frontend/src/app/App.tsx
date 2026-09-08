@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { Button } from '@mui/material'
 import { CreatedPoll, PollStatus } from '../entities/poll/types'
@@ -11,22 +11,30 @@ import PollInfoPage from '../pages/PollInfoPage'
 import PollListPage from '../pages/PollListPage'
 import PollPage from '../pages/PollPage'
 import ResultsPage from '../pages/ResultsPage'
+import * as authApi from '../shared/api/auth'
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    sessionStorage.getItem('isLoggedIn') === 'true',
-  )
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isCheckingSession, setIsCheckingSession] = useState(true)
   const [createdPolls, setCreatedPolls] = useState<CreatedPoll[]>([
     { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
   ])
 
-  function login() {
-    sessionStorage.setItem('isLoggedIn', 'true')
+  useEffect(() => {
+    authApi.checkSession().then((valid) => {
+      setIsLoggedIn(valid)
+      setIsCheckingSession(false)
+    })
+  }, [])
+
+  async function login(email: string, password: string, isRegistration: boolean) {
+    if (isRegistration) await authApi.register(email, password)
+    else await authApi.login(email, password)
     setIsLoggedIn(true)
   }
 
-  function logout() {
-    sessionStorage.removeItem('isLoggedIn')
+  async function logout() {
+    await authApi.logout()
     setIsLoggedIn(false)
   }
 
@@ -58,7 +66,7 @@ export default function App() {
         </nav>
       </header>
 
-      <Routes>
+      {!isCheckingSession && <Routes>
         <Route path="/" element={<PollListPage />} />
         <Route
           path="/login"
@@ -86,7 +94,7 @@ export default function App() {
         <Route path="/polls/:pollId/vote" element={<PollPage isLoggedIn={isLoggedIn} />} />
         <Route path="/polls/:pollId/results" element={<ResultsPage isLoggedIn={isLoggedIn} />} />
         <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      </Routes>}
     </>
   )
 }

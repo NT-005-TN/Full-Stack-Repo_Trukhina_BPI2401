@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base, get_db
 from app.main import app
 from app.models import Participation, Submission, User
+from app.security import create_access_token
 
 
 @pytest.fixture()
@@ -50,7 +51,7 @@ def create_poll(client: TestClient, access: str = "public") -> dict:
                     "options": [{"text": "Первый"}, {"text": "Второй"}],
                 }
             ],
-        },
+        }, headers={"Authorization": f"Bearer {create_access_token(1)}"},
     )
     assert response.status_code == 201
     return response.json()
@@ -90,8 +91,9 @@ def test_registered_user_cannot_vote_twice(voting_client) -> None:
             {"question_id": question["id"], "option_id": question["options"][1]["id"]}
         ],
     }
-    assert client.post(f"/polls/{poll['id']}/submissions", json=answer).status_code == 201
-    assert client.post(f"/polls/{poll['id']}/submissions", json=answer).status_code == 409
+    headers = {"Authorization": f"Bearer {create_access_token(1)}"}
+    assert client.post(f"/polls/{poll['id']}/submissions", json=answer, headers=headers).status_code == 201
+    assert client.post(f"/polls/{poll['id']}/submissions", json=answer, headers=headers).status_code == 409
 
 
 def test_submission_validation(voting_client) -> None:
@@ -118,5 +120,6 @@ def test_submission_validation(voting_client) -> None:
             "user_id": 1,
             "answers": [{"question_id": question["id"], "option_id": 999}],
         },
+        headers={"Authorization": f"Bearer {create_access_token(1)}"},
     )
     assert wrong_option.status_code == 422

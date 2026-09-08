@@ -14,6 +14,7 @@ EXPECTED_TABLES = {
     "participations",
     "submissions",
     "answers",
+    "refresh_tokens",
 }
 
 

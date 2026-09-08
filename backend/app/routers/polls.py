@@ -1,7 +1,11 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from .. import crud, schemas, services
+from .. import auth, crud, models, schemas, services
 from ..database import get_db
 
 router = APIRouter(prefix="/polls", tags=["Опросы"])
@@ -25,8 +29,12 @@ def read_poll(poll_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("", response_model=schemas.PollRead, status_code=status.HTTP_201_CREATED)
-def create_poll(data: schemas.PollCreate, db: Session = Depends(get_db)):
-    poll = crud.create_poll(db, data)
+def create_poll(
+    data: schemas.PollCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user),
+):
+    poll = crud.create_poll(db, data.model_copy(update={"owner_id": user.id}))
     if poll is None:
         raise HTTPException(status_code=404, detail="Владелец опроса не найден")
     return poll
@@ -34,19 +42,30 @@ def create_poll(data: schemas.PollCreate, db: Session = Depends(get_db)):
 
 @router.patch("/{poll_id}", response_model=schemas.PollRead)
 def update_poll(
-    poll_id: int, data: schemas.PollUpdate, db: Session = Depends(get_db)
+    poll_id: int,
+    data: schemas.PollUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user),
 ):
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
+    if poll.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="Можно изменять только свои опросы")
     return crud.update_poll(db, poll, data)
 
 
 @router.delete("/{poll_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_poll(poll_id: int, db: Session = Depends(get_db)):
+def delete_poll(
+    poll_id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user),
+):
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
+    if poll.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="Можно удалять только свои опросы")
     crud.delete_poll(db, poll)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -57,10 +76,14 @@ def delete_poll(poll_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
 )
 def submit_poll(
-    poll_id: int, data: schemas.SubmissionCreate, db: Session = Depends(get_db)
+    poll_id: int,
+    data: schemas.SubmissionCreate,
+    db: Session = Depends(get_db),
+    user: Optional[models.User] = Depends(auth.get_optional_user),
 ):
     try:
-        return services.submit_answers(db, poll_id, data)
+        safe_data = data.model_copy(update={"user_id": user.id if user else None})
+        return services.submit_answers(db, poll_id, safe_data)
     except services.VoteError as error:
         handle_vote_error(error)
 
