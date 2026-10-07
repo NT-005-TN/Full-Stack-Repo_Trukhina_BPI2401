@@ -6,6 +6,7 @@ type PageMessageProps = {
   linkTo?: string
 }
 
+// Универсальная страница с сообщением и необязательной ссылкой возврата.
 export default function PageMessage({ title, linkText, linkTo }: PageMessageProps) {
   return (
     <main>

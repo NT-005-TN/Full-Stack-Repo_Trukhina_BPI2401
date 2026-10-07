@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './app/App'
 import './app/styles.css'
 
+// Точка входа: подключает маршрутизацию и отображает корневой компонент.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>

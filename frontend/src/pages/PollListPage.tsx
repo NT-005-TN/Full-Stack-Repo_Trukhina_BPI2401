@@ -5,6 +5,7 @@ import { usePolls } from '../entities/poll/usePolls'
 import DataState from '../shared/ui/DataState'
 import { statusLabels } from '../entities/poll/types'
 
+// Главная страница показывает загрузку, поиск и карточки опросов.
 export default function PollListPage() {
   const [search, setSearch] = useState('')
   const { polls, isLoading, error, retry } = usePolls()
