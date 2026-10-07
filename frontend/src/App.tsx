@@ -1,11 +1,13 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { Button, TextField } from '@mui/material'
 
+// Первые демонстрационные данные до появления backend.
 const polls = [
   { id: 1, title: 'Студенческие мероприятия', questions: 3 },
   { id: 2, title: 'Выбор формата занятий', questions: 4 },
 ]
 
+// Начальная главная страница со списком опросов.
 function PollList() {
   return (
     <main>
@@ -25,6 +27,7 @@ function PollList() {
   )
 }
 
+// Первый макет формы входа и гостевого режима.
 function Login() {
   return (
     <main className="small-page">
@@ -39,6 +42,7 @@ function Login() {
   )
 }
 
+// Запасная страница для неизвестного адреса.
 function NotFound() {
   return (
     <main>
@@ -48,6 +52,7 @@ function NotFound() {
   )
 }
 
+// Корневой компонент объединяет меню и первые клиентские маршруты.
 export default function App() {
   return (
     <>
@@ -59,6 +64,7 @@ export default function App() {
         </nav>
       </header>
 
+      {/* URL определяет, какой экран показывается без перезагрузки страницы. */}
       <Routes>
         <Route path="/" element={<PollList />} />
         <Route path="/login" element={<Login />} />
