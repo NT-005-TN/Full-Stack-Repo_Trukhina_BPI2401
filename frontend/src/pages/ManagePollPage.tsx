@@ -7,6 +7,7 @@ import { deletePoll, updatePoll } from '../shared/api/polls'
 import DataState from '../shared/ui/DataState'
 import PageMessage from '../shared/ui/PageMessage'
 
+// Позволяет владельцу публиковать, завершать и удалять опрос.
 export default function ManagePollPage() {
   const id = Number(useParams().pollId)
   const navigate = useNavigate()

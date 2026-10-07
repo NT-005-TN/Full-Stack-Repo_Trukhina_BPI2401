@@ -17,6 +17,7 @@ import { submitPoll } from '../shared/api/polls'
 import DataState from '../shared/ui/DataState'
 import PageMessage from '../shared/ui/PageMessage'
 
+// Восстанавливает незавершённые ответы из текущей вкладки.
 function loadAnswers(key: string) {
   const savedAnswers = sessionStorage.getItem(key)
 
@@ -31,6 +32,7 @@ type PollPageProps = {
   isLoggedIn: boolean
 }
 
+// Управляет прохождением опроса и отправляет ответы на backend.
 export default function PollPage({ isLoggedIn }: PollPageProps) {
   const { pollId } = useParams()
   const numericPollId = Number(pollId)

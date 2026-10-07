@@ -8,6 +8,7 @@ type PollInfoPageProps = {
   isLoggedIn: boolean
 }
 
+// Загружает описание опроса и проверяет необходимость входа.
 export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
   const { pollId } = useParams()
   const { poll, isLoading, error } = usePoll(Number(pollId))

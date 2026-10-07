@@ -80,6 +80,7 @@ def test_poll_crud(client: TestClient) -> None:
 
 
 def test_private_poll_routes_require_owner(client: TestClient) -> None:
+    """Личные коллекции и черновики доступны только владельцу."""
     assert client.get("/polls/mine").status_code == 401
     created = client.post("/polls", json=poll_data(), headers=auth_headers()).json()
     mine = client.get("/polls/mine", headers=auth_headers())

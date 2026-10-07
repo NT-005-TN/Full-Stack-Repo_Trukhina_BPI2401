@@ -7,6 +7,7 @@ import DataState from '../shared/ui/DataState'
 
 type HistoryPageProps = { currentUserId: number }
 
+// Загружает с backend участия и созданные пользователем опросы.
 export default function HistoryPage({ currentUserId: _currentUserId }: HistoryPageProps) {
   const [tab, setTab] = useState(0)
   const [created, setCreated] = useState<Poll[]>([])

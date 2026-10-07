@@ -1,3 +1,4 @@
+// Адрес backend можно переопределить через переменную окружения Vite.
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export type User = { id: number; email: string }
@@ -8,16 +9,19 @@ export type TokenPair = {
   token_type: string
 }
 
+// Сохраняет пару токенов в пределах текущей вкладки.
 function saveTokens(tokens: TokenPair) {
   sessionStorage.setItem('accessToken', tokens.access_token)
   sessionStorage.setItem('refreshToken', tokens.refresh_token)
 }
 
+// Извлекает понятное сообщение из ошибочного ответа API.
 async function readError(response: Response) {
   const body = await response.json().catch(() => null)
   return body?.detail || 'Не удалось выполнить запрос.'
 }
 
+// Выполняет вход и сохраняет полученную пару токенов.
 export async function login(email: string, password: string) {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
@@ -28,6 +32,7 @@ export async function login(email: string, password: string) {
   saveTokens(await response.json())
 }
 
+// Регистрирует пользователя и сохраняет его первую сессию.
 export async function register(email: string, password: string) {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
@@ -38,6 +43,7 @@ export async function register(email: string, password: string) {
   saveTokens(await response.json())
 }
 
+// Обменивает refresh token на новую пару токенов.
 export async function refreshAccessToken() {
   const refreshToken = sessionStorage.getItem('refreshToken')
   if (!refreshToken) return false
@@ -54,6 +60,7 @@ export async function refreshAccessToken() {
   return true
 }
 
+// Возвращает профиль текущего пользователя или null для гостя.
 export async function getCurrentUser(): Promise<User | null> {
   const accessToken = sessionStorage.getItem('accessToken')
   if (!accessToken) return null
@@ -68,6 +75,7 @@ export async function getCurrentUser(): Promise<User | null> {
   return response.ok ? response.json() : null
 }
 
+// Отзывает refresh token и завершает локальную сессию.
 export async function logout() {
   const refreshToken = sessionStorage.getItem('refreshToken')
   if (refreshToken) {
@@ -80,6 +88,7 @@ export async function logout() {
   clearTokens()
 }
 
+// Удаляет токены и уведомляет приложение об окончании сессии.
 export function clearTokens() {
   sessionStorage.removeItem('accessToken')
   sessionStorage.removeItem('refreshToken')

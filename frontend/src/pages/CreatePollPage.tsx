@@ -9,6 +9,7 @@ type Question = {
   options: string[]
 }
 
+// Создаёт полноценный опрос через backend API.
 export default function CreatePollPage() {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')

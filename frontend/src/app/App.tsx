@@ -12,11 +12,13 @@ import PollPage from '../pages/PollPage'
 import ResultsPage from '../pages/ResultsPage'
 import * as authApi from '../shared/api/auth'
 
+// Корневой компонент проверяет сессию и управляет клиентскими маршрутами.
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
   const [currentUser, setCurrentUser] = useState<authApi.User | null>(null)
 
+  // Восстанавливает сессию и подписывается на её принудительное завершение.
   useEffect(() => {
     authApi.getCurrentUser().then((user) => {
       setCurrentUser(user)
@@ -33,6 +35,7 @@ export default function App() {
     return () => window.removeEventListener('auth-session-ended', handleSessionEnd)
   }, [])
 
+  // Выполняет вход или регистрацию и загружает профиль пользователя.
   async function login(email: string, password: string, isRegistration: boolean) {
     if (isRegistration) await authApi.register(email, password)
     else await authApi.login(email, password)
@@ -40,6 +43,7 @@ export default function App() {
     setIsLoggedIn(true)
   }
 
+  // Завершает сессию на backend и очищает состояние интерфейса.
   async function logout() {
     await authApi.logout()
     setCurrentUser(null)
@@ -64,6 +68,7 @@ export default function App() {
         </nav>
       </header>
 
+      {/* Маршруты отображаются только после проверки сохранённой сессии. */}
       {!isCheckingSession && <Routes>
         <Route path="/" element={<PollListPage />} />
         <Route

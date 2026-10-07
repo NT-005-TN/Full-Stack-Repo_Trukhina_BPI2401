@@ -7,6 +7,7 @@ client = TestClient(app)
 
 
 def test_health() -> None:
+    """Маршрут health подтверждает работу приложения."""
     response = client.get("/health")
 
     assert response.status_code == 200
@@ -14,6 +15,7 @@ def test_health() -> None:
 
 
 def test_local_frontend_is_allowed_by_cors() -> None:
+    """Локальный frontend может обращаться к backend из браузера."""
     response = client.options(
         "/polls",
         headers={
@@ -24,3 +26,4 @@ def test_local_frontend_is_allowed_by_cors() -> None:
 
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5173"
+"""Проверки доступности API и разрешённого локального CORS."""

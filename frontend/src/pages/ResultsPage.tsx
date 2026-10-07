@@ -20,6 +20,7 @@ type ResultsPageProps = {
   isLoggedIn: boolean
 }
 
+// Загружает и отображает настоящие агрегированные результаты API.
 export default function ResultsPage({ isLoggedIn: _isLoggedIn }: ResultsPageProps) {
   const { pollId } = useParams()
   const [results, setResults] = useState<Results | null>(null)
