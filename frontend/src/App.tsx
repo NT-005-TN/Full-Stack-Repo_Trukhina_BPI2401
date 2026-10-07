@@ -11,6 +11,7 @@ import ResultsPage from './ResultsPage'
 import { polls } from './pollData'
 import { CreatedPoll, PollStatus } from './types'
 
+// Главная страница со списком и поиском доступных опросов.
 function PollList() {
   const [search, setSearch] = useState('')
   const visiblePolls = polls.filter((poll) =>
@@ -55,6 +56,7 @@ function PollList() {
   )
 }
 
+// Запасная страница для неизвестного адреса.
 function NotFound() {
   return (
     <main>
@@ -64,7 +66,9 @@ function NotFound() {
   )
 }
 
+// Корневой компонент хранит общее состояние, меню и маршруты приложения.
 export default function App() {
+  // В ЛР №1 вход имитируется значением в хранилище текущей вкладки.
   const [isLoggedIn, setIsLoggedIn] = useState(
     sessionStorage.getItem('isLoggedIn') === 'true',
   )
@@ -72,20 +76,24 @@ export default function App() {
     { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
   ])
 
+  // Сохраняет демонстрационный признак авторизации.
   function login() {
     sessionStorage.setItem('isLoggedIn', 'true')
     setIsLoggedIn(true)
   }
 
+  // Удаляет признак авторизации и возвращает гостевой режим.
   function logout() {
     sessionStorage.removeItem('isLoggedIn')
     setIsLoggedIn(false)
   }
 
+  // Добавляет созданный опрос в локальную историю пользователя.
   function addCreatedPoll(newPoll: CreatedPoll) {
     setCreatedPolls([...createdPolls, newPoll])
   }
 
+  // Обновляет статус выбранного опроса без изменения остальных элементов.
   function changePollStatus(pollId: number, status: PollStatus) {
     setCreatedPolls(createdPolls.map((poll) =>
       poll.id === pollId ? { ...poll, status } : poll,
@@ -110,6 +118,7 @@ export default function App() {
         </nav>
       </header>
 
+      {/* Таблица клиентских маршрутов: URL определяет отображаемую страницу. */}
       <Routes>
         <Route path="/" element={<PollList />} />
         <Route

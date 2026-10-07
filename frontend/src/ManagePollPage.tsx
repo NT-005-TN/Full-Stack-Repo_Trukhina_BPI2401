@@ -9,6 +9,7 @@ type ManagePollPageProps = {
   onStatusChange: (pollId: number, status: PollStatus) => void
 }
 
+// Страница управления статусом одного созданного опроса.
 export default function ManagePollPage({ polls, onStatusChange }: ManagePollPageProps) {
   const { pollId } = useParams()
   const [message, setMessage] = useState('')
@@ -19,12 +20,14 @@ export default function ManagePollPage({ polls, onStatusChange }: ManagePollPage
     return <main><h1>Опрос не найден</h1></main>
   }
 
+  // Переводит черновик в активное состояние.
   function publishPoll() {
     if (!selectedPoll) return
     onStatusChange(selectedPoll.id, 'Активен')
     setMessage('Опрос опубликован и доступен участникам.')
   }
 
+  // Завершает приём новых ответов.
   function finishPoll() {
     if (!selectedPoll) return
     onStatusChange(selectedPoll.id, 'Завершён')

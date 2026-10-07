@@ -2,12 +2,14 @@ import { Navigate, useParams } from 'react-router-dom'
 import { LinearProgress } from '@mui/material'
 import { polls } from './pollData'
 
+// Демонстрационные количества голосов для макета результатов ЛР №1.
 const voteCounts = [18, 12, 10, 7]
 
 type ResultsPageProps = {
   isLoggedIn: boolean
 }
 
+// Показывает агрегированную статистику без данных отдельных участников.
 export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))

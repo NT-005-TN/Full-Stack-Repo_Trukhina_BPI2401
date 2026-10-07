@@ -2,11 +2,13 @@ import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert, Button, Tab, Tabs, TextField } from '@mui/material'
 
+// Функции, которые страница вызывает после входа или выбора гостевого режима.
 type AuthPageProps = {
   onLogin: () => void
   onGuest: () => void
 }
 
+// Общая страница входа и регистрации с переключением вкладок.
 export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [tab, setTab] = useState(0)
   const [password, setPassword] = useState('')
@@ -14,6 +16,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  // Проверяет пароль, выполняет демонстрационный вход и открывает главную страницу.
   function submitForm(event: FormEvent) {
     event.preventDefault()
 
@@ -32,6 +35,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
     navigate('/')
   }
 
+  // Переключает режим формы и очищает прежнюю ошибку.
   function changeTab(newTab: number) {
     setTab(newTab)
     setError('')
