@@ -1,5 +1,6 @@
 import { Poll } from './types'
 
+// Демонстрационные данные до подключения frontend к настоящему API.
 export const polls: Poll[] = [
   {
     id: 1,

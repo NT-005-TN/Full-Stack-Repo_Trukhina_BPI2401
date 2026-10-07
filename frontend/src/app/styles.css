@@ -1,3 +1,4 @@
+/* Общие цвета, шрифт и фон всего приложения. */
 :root {
   font-family: Arial, sans-serif;
   color: #17213c;
@@ -12,6 +13,7 @@ body {
   margin: 0;
 }
 
+/* Верхнее меню с навигацией между основными страницами. */
 header {
   display: flex;
   justify-content: space-between;
@@ -47,6 +49,7 @@ main {
   max-width: 520px;
 }
 
+/* Сетка карточек автоматически меняет количество колонок. */
 .poll-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -63,6 +66,7 @@ main {
   margin-bottom: 16px;
 }
 
+/* Универсальная белая карточка для форм, опросов и результатов. */
 .card {
   padding: 24px;
   border-radius: 14px;
@@ -109,6 +113,7 @@ main {
   margin-top: 20px;
 }
 
+/* Общий блок кнопок основных действий. */
 .actions {
   display: flex;
   justify-content: space-between;
@@ -149,6 +154,7 @@ main {
   margin: 0;
 }
 
+/* Оформление агрегированных результатов голосования. */
 .results-list {
   display: grid;
   gap: 20px;
@@ -198,6 +204,7 @@ main {
   margin: 0;
 }
 
+/* На телефоне меню, поля и кнопки перестраиваются в одну колонку. */
 @media (max-width: 600px) {
   header {
     align-items: flex-start;

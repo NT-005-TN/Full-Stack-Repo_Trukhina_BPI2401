@@ -15,6 +15,7 @@ import {
 import { polls } from '../entities/poll/data'
 import PageMessage from '../shared/ui/PageMessage'
 
+// Безопасно восстанавливает сохранённые ответы из sessionStorage.
 function loadAnswers(key: string) {
   const savedAnswers = sessionStorage.getItem(key)
 
@@ -29,6 +30,7 @@ type PollPageProps = {
   isLoggedIn: boolean
 }
 
+// Управляет прохождением, проверкой и отправкой опроса.
 export default function PollPage({ isLoggedIn }: PollPageProps) {
   const { pollId } = useParams()
   const selectedPoll = polls.find((item) => item.id === Number(pollId))
@@ -43,11 +45,13 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
   const [isFinished, setIsFinished] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
+  // Производные значения пересчитываются при изменении состояния.
   const question = poll.questions[questionIndex]
   const currentAnswer = answers[questionIndex] || ''
   const answeredCount = answers.filter(Boolean).length
   const allQuestionsAnswered = answeredCount === poll.questions.length
 
+  // Сохраняет незавершённый прогресс в текущей вкладке.
   useEffect(() => {
     sessionStorage.setItem(answersKey, JSON.stringify(answers))
     sessionStorage.setItem(questionKey, String(questionIndex))
@@ -61,12 +65,14 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     return <Navigate replace to="/login" />
   }
 
+  // Записывает выбранный вариант текущего вопроса.
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]
     newAnswers[questionIndex] = answer
     setAnswers(newAnswers)
   }
 
+  // Переходит дальше или открывает проверку ответов.
   function goNext() {
     if (questionIndex < poll.questions.length - 1) {
       setQuestionIndex(questionIndex + 1)
@@ -75,6 +81,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     }
   }
 
+  // Финальное состояние после подтверждённой отправки.
   if (isFinished) {
     return (
       <main className="small-page">
@@ -91,6 +98,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     )
   }
 
+  // Экран проверки позволяет вернуться к любому вопросу.
   if (isReview) {
     return (
       <main className="small-page">
