@@ -27,6 +27,7 @@ class User(Base):
 
 
 class RefreshToken(Base):
+    """Хеш долгоживущего токена с датой истечения и признаком отзыва."""
     __tablename__ = "refresh_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -10,6 +10,7 @@ from app.main import app
 
 @pytest.fixture()
 def client():
+    """Создаёт API-клиент с отдельной тестовой базой."""
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
@@ -27,6 +28,7 @@ def client():
 
 
 def test_register_login_refresh_and_logout(client: TestClient):
+    """Проверяет регистрацию, вход, обновление и отзыв refresh token."""
     credentials = {"email": "student@example.com", "password": "password123"}
     registered = client.post("/auth/register", json=credentials)
     assert registered.status_code == 201
@@ -58,7 +60,9 @@ def test_register_login_refresh_and_logout(client: TestClient):
 
 
 def test_protected_route_requires_access_token(client: TestClient):
+    """Защищённый маршрут отклоняет запрос без access token."""
     assert client.get("/auth/me").status_code == 401
     assert client.get(
         "/auth/me", headers={"Authorization": "Bearer broken-token"}
     ).status_code == 401
+"""Интеграционные проверки полного жизненного цикла токенов."""

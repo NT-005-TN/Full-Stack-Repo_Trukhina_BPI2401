@@ -14,6 +14,7 @@ from app.security import create_access_token
 
 @pytest.fixture()
 def client() -> TestClient:
+    """Создаёт тестовый клиент и временную базу."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -37,6 +38,7 @@ def client() -> TestClient:
 
 
 def poll_data() -> dict:
+    """Формирует корректное тело нового опроса."""
     return {
         "title": "Новый опрос",
         "description": "Описание",
@@ -53,10 +55,12 @@ def poll_data() -> dict:
 
 
 def auth_headers() -> dict[str, str]:
+    """Выпускает access token для владельца тестового опроса."""
     return {"Authorization": f"Bearer {create_access_token(1)}"}
 
 
 def test_poll_crud(client: TestClient) -> None:
+    """Проверяет CRUD с авторизацией владельца."""
     created = client.post("/polls", json=poll_data(), headers=auth_headers())
     assert created.status_code == 201
     poll_id = created.json()["id"]
@@ -93,6 +97,7 @@ def test_private_poll_routes_require_owner(client: TestClient) -> None:
 
 
 def test_poll_validation_and_missing_owner(client: TestClient) -> None:
+    """Проверяет валидацию и обязательность access token."""
     invalid = poll_data()
     invalid["questions"][0]["options"] = [{"text": "Один вариант"}]
     assert client.post("/polls", json=invalid, headers=auth_headers()).status_code == 422
@@ -102,3 +107,4 @@ def test_poll_validation_and_missing_owner(client: TestClient) -> None:
     response = client.post("/polls", json=missing_owner, headers=auth_headers())
     assert response.status_code == 201
     assert response.json()["owner_id"] == 1
+"""Интеграционные проверки защищённого CRUD опросов."""
