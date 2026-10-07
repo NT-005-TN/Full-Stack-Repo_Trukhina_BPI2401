@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button, Chip, Tab, Tabs } from '@mui/material'
 import { CreatedPoll } from './types'
 
+// Демонстрационная история уже пройденных опросов.
 const completedPolls = [
   { id: 1, title: 'Студенческие мероприятия', date: '4 сентября 2026' },
   { id: 2, title: 'Выбор формата занятий', date: '1 сентября 2026' },
@@ -12,6 +13,7 @@ type HistoryPageProps = {
   createdPolls: CreatedPoll[]
 }
 
+// Страница переключается между участиями пользователя и созданными опросами.
 export default function HistoryPage({ createdPolls }: HistoryPageProps) {
   const [tab, setTab] = useState(0)
 

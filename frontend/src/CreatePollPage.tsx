@@ -3,16 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { Alert, Button, MenuItem, TextField } from '@mui/material'
 import { CreatedPoll } from './types'
 
+// Структура одного вопроса в форме создания опроса.
 type Question = {
   id: number
   text: string
   options: string[]
 }
 
+// Родитель передаёт обработчик для сохранения готовой карточки опроса.
 type CreatePollPageProps = {
   onSave: (poll: CreatedPoll) => void
 }
 
+// Форма создания опроса с динамическими вопросами и вариантами ответа.
 export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
@@ -25,18 +28,21 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     { id: 1, text: '', options: ['', ''] },
   ])
 
+  // Изменяет текст выбранного вопроса.
   function changeQuestion(questionIndex: number, text: string) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].text = text
     setQuestions(newQuestions)
   }
 
+  // Изменяет один вариант ответа внутри выбранного вопроса.
   function changeOption(questionIndex: number, optionIndex: number, text: string) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options[optionIndex] = text
     setQuestions(newQuestions)
   }
 
+  // Добавляет новый вопрос с двумя пустыми вариантами.
   function addQuestion() {
     setQuestions([
       ...questions,
@@ -44,16 +50,19 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     ])
   }
 
+  // Удаляет вопрос по его позиции в массиве.
   function removeQuestion(questionIndex: number) {
     setQuestions(questions.filter((_, index) => index !== questionIndex))
   }
 
+  // Добавляет пустой вариант ответа к выбранному вопросу.
   function addOption(questionIndex: number) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options.push('')
     setQuestions(newQuestions)
   }
 
+  // Удаляет вариант, сохраняя минимум два варианта в интерфейсе.
   function removeOption(questionIndex: number, optionIndex: number) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter(
@@ -62,6 +71,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     setQuestions(newQuestions)
   }
 
+  // Проверяет форму и сохраняет опрос как черновик или активный.
   function savePoll(event: FormEvent) {
     event.preventDefault()
     const submitEvent = event.nativeEvent as SubmitEvent

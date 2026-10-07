@@ -6,6 +6,7 @@ type PollInfoPageProps = {
   isLoggedIn: boolean
 }
 
+// Показывает описание и правила перед началом выбранного опроса.
 export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
@@ -14,6 +15,7 @@ export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
     return <main><h1>Опрос не найден</h1></main>
   }
 
+  // Закрытый опрос перенаправляет гостя на страницу входа.
   if (poll.access === 'После входа' && !isLoggedIn) {
     return <Navigate replace to="/login" />
   }

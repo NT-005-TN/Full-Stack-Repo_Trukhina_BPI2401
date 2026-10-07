@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { polls } from './pollData'
 
+// Безопасно восстанавливает сохранённые ответы из sessionStorage.
 function loadAnswers(key: string) {
   const savedAnswers = sessionStorage.getItem(key)
 
@@ -28,6 +29,7 @@ type PollPageProps = {
   isLoggedIn: boolean
 }
 
+// Страница прохождения опроса, проверки и отправки ответов.
 export default function PollPage({ isLoggedIn }: PollPageProps) {
   const { pollId } = useParams()
   const selectedPoll = polls.find((item) => item.id === Number(pollId))
@@ -42,11 +44,13 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
   const [isFinished, setIsFinished] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
+  // Производные значения пересчитываются при каждом изменении состояния.
   const question = poll.questions[questionIndex]
   const currentAnswer = answers[questionIndex] || ''
   const answeredCount = answers.filter(Boolean).length
   const allQuestionsAnswered = answeredCount === poll.questions.length
 
+  // Сохраняет прогресс, чтобы он не пропал при обновлении страницы.
   useEffect(() => {
     sessionStorage.setItem(answersKey, JSON.stringify(answers))
     sessionStorage.setItem(questionKey, String(questionIndex))
@@ -60,12 +64,14 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     return <Navigate replace to="/login" />
   }
 
+  // Записывает выбранный вариант для текущего вопроса.
   function selectAnswer(answer: string) {
     const newAnswers = [...answers]
     newAnswers[questionIndex] = answer
     setAnswers(newAnswers)
   }
 
+  // Открывает следующий вопрос или экран проверки ответов.
   function goNext() {
     if (questionIndex < poll.questions.length - 1) {
       setQuestionIndex(questionIndex + 1)
@@ -74,6 +80,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     }
   }
 
+  // После подтверждения показывается финальное состояние опроса.
   if (isFinished) {
     return (
       <main className="small-page">
@@ -90,6 +97,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
     )
   }
 
+  // Перед отправкой пользователь видит все выбранные ответы.
   if (isReview) {
     return (
       <main className="small-page">
