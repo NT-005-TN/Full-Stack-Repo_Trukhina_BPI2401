@@ -13,6 +13,7 @@ from app.models import User
 
 @pytest.fixture()
 def client_and_session():
+    """Готовит тестовый клиент и сессию одной временной базы."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -32,6 +33,7 @@ def client_and_session():
 
 
 def test_user_crud_and_password_hash(client_and_session) -> None:
+    """Проверяет CRUD и отсутствие открытого пароля в базе."""
     client, test_session = client_and_session
     created = client.post(
         "/users", json={"email": "student@example.com", "password": "password123"}
@@ -52,6 +54,7 @@ def test_user_crud_and_password_hash(client_and_session) -> None:
 
 
 def test_duplicate_email_and_invalid_password(client_and_session) -> None:
+    """Проверяет уникальность почты и минимальную длину пароля."""
     client, _ = client_and_session
     data = {"email": "student@example.com", "password": "password123"}
     assert client.post("/users", json=data).status_code == 201
@@ -65,6 +68,7 @@ def test_duplicate_email_and_invalid_password(client_and_session) -> None:
 
 
 def test_user_with_poll_cannot_be_deleted(client_and_session) -> None:
+    """Связанный опрос защищает владельца от удаления."""
     client, _ = client_and_session
     user = client.post(
         "/users", json={"email": "owner@example.com", "password": "password123"}
@@ -85,3 +89,4 @@ def test_user_with_poll_cannot_be_deleted(client_and_session) -> None:
     response = client.delete(f"/users/{user['id']}")
     assert response.status_code == 409
     assert response.json()["detail"] == "Сначала удалите опросы пользователя"
+"""Интеграционные проверки пользовательского API."""

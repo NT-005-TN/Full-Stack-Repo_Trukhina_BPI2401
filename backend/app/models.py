@@ -1,3 +1,5 @@
+"""ORM-модели таблиц и связей системы опросов."""
+
 from __future__ import annotations
 
 from datetime import date, datetime
@@ -10,6 +12,7 @@ from .database import Base
 
 
 class User(Base):
+    """Зарегистрированный пользователь и владелец опросов."""
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -21,6 +24,7 @@ class User(Base):
 
 
 class Poll(Base):
+    """Опрос с настройками доступа, вопросами и ответами."""
     __tablename__ = "polls"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -45,6 +49,7 @@ class Poll(Base):
 
 
 class Question(Base):
+    """Один вопрос, принадлежащий конкретному опросу."""
     __tablename__ = "questions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -58,6 +63,7 @@ class Question(Base):
 
 
 class Option(Base):
+    """Доступный вариант ответа на вопрос."""
     __tablename__ = "options"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -70,6 +76,7 @@ class Option(Base):
 
 
 class Participation(Base):
+    """Факт участия без хранения выбранных пользователем ответов."""
     __tablename__ = "participations"
     __table_args__ = (
         UniqueConstraint("poll_id", "user_id", name="uq_participation_poll_user"),
@@ -85,6 +92,7 @@ class Participation(Base):
 
 
 class Submission(Base):
+    """Анонимный набор отправленных ответов на один опрос."""
     __tablename__ = "submissions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -98,6 +106,7 @@ class Submission(Base):
 
 
 class Answer(Base):
+    """Связь отправки, вопроса и выбранного варианта."""
     __tablename__ = "answers"
     __table_args__ = (
         UniqueConstraint("submission_id", "question_id", name="uq_answer_question"),
