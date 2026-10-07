@@ -13,6 +13,7 @@ import PollPage from '../pages/PollPage'
 import ResultsPage from '../pages/ResultsPage'
 import * as authApi from '../shared/api/auth'
 
+// Корневой компонент проверяет сессию, хранит общее состояние и маршруты.
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
@@ -20,6 +21,7 @@ export default function App() {
     { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
   ])
 
+  // При открытии приложения проверяет сохранённый access token.
   useEffect(() => {
     authApi.checkSession().then((valid) => {
       setIsLoggedIn(valid)
@@ -27,21 +29,25 @@ export default function App() {
     })
   }, [])
 
+  // Вызывает вход или регистрацию через настоящий backend API.
   async function login(email: string, password: string, isRegistration: boolean) {
     if (isRegistration) await authApi.register(email, password)
     else await authApi.login(email, password)
     setIsLoggedIn(true)
   }
 
+  // Отзывает refresh token и переключает интерфейс в гостевой режим.
   async function logout() {
     await authApi.logout()
     setIsLoggedIn(false)
   }
 
+  // Добавляет созданный опрос в локальную историю интерфейса.
   function addCreatedPoll(newPoll: CreatedPoll) {
     setCreatedPolls([...createdPolls, newPoll])
   }
 
+  // Обновляет статус выбранного опроса.
   function changePollStatus(pollId: number, status: PollStatus) {
     setCreatedPolls(createdPolls.map((poll) =>
       poll.id === pollId ? { ...poll, status } : poll,
@@ -66,6 +72,7 @@ export default function App() {
         </nav>
       </header>
 
+      {/* Маршруты показываются после завершения проверки сессии. */}
       {!isCheckingSession && <Routes>
         <Route path="/" element={<PollListPage />} />
         <Route

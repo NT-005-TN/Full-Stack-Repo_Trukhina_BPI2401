@@ -42,15 +42,18 @@ class UserRead(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    """Почта и пароль для входа."""
     email: str
     password: str
 
 
 class RefreshRequest(BaseModel):
+    """Refresh token для обновления сессии или выхода."""
     refresh_token: str
 
 
 class TokenPair(BaseModel):
+    """Пара access и refresh токенов, возвращаемая клиенту."""
     access_token: str
     refresh_token: str
     token_type: str = "bearer"

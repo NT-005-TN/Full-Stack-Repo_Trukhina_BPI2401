@@ -1,3 +1,5 @@
+"""Сценарии входа, выпуска токенов и определения текущего пользователя."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -23,6 +25,7 @@ bearer = HTTPBearer(auto_error=False)
 
 
 def authenticate(db: Session, email: str, password: str) -> models.User | None:
+    """Проверяет почту и пароль пользователя."""
     user = db.scalar(select(models.User).where(models.User.email == email.lower()))
     if user is None or not verify_password(password, user.password_hash):
         return None
@@ -30,6 +33,7 @@ def authenticate(db: Session, email: str, password: str) -> models.User | None:
 
 
 def issue_tokens(db: Session, user: models.User) -> schemas.TokenPair:
+    """Выпускает короткий access token и сохраняет хеш refresh token."""
     refresh = create_refresh_token()
     db.add(models.RefreshToken(
         token_hash=hash_token(refresh),
@@ -43,6 +47,7 @@ def issue_tokens(db: Session, user: models.User) -> schemas.TokenPair:
 
 
 def use_refresh_token(db: Session, token: str) -> models.User | None:
+    """Возвращает владельца действующего refresh token."""
     saved = db.scalar(select(models.RefreshToken).where(
         models.RefreshToken.token_hash == hash_token(token)
     ))
@@ -52,6 +57,7 @@ def use_refresh_token(db: Session, token: str) -> models.User | None:
 
 
 def revoke_refresh_token(db: Session, token: str) -> bool:
+    """Помечает refresh token отозванным при выходе или обновлении."""
     saved = db.scalar(select(models.RefreshToken).where(
         models.RefreshToken.token_hash == hash_token(token)
     ))
@@ -66,6 +72,7 @@ def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer),
     db: Session = Depends(get_db),
 ) -> models.User:
+    """FastAPI-зависимость для обязательной авторизации."""
     user_id = read_access_token(credentials.credentials) if credentials else None
     user = db.get(models.User, user_id) if user_id is not None else None
     if user is None:
@@ -77,6 +84,7 @@ def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer),
     db: Session = Depends(get_db),
 ) -> Optional[models.User]:
+    """Возвращает пользователя при наличии токена или None для гостя."""
     if credentials is None:
         return None
     user_id = read_access_token(credentials.credentials)

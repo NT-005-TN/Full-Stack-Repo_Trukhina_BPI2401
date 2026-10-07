@@ -7,6 +7,7 @@ type AuthPageProps = {
   onGuest: () => void
 }
 
+// Форма входа и регистрации, связанная с backend API.
 export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [tab, setTab] = useState(0)
   const [email, setEmail] = useState('')
@@ -16,6 +17,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
+  // Валидирует форму, отправляет запрос и показывает ошибку backend.
   async function submitForm(event: FormEvent) {
     event.preventDefault()
 
@@ -41,6 +43,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
     }
   }
 
+  // Переключает режим формы и очищает прежнее сообщение.
   function changeTab(newTab: number) {
     setTab(newTab)
     setError('')

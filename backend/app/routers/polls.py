@@ -1,3 +1,5 @@
+"""Маршруты опросов с проверкой владельца и необязательным входом гостя."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -12,16 +14,19 @@ router = APIRouter(prefix="/polls", tags=["Опросы"])
 
 
 def handle_vote_error(error: services.VoteError):
+    """Преобразует ошибку бизнес-логики в HTTP-ответ."""
     raise HTTPException(status_code=error.status_code, detail=error.detail)
 
 
 @router.get("", response_model=list[schemas.PollRead])
 def read_polls(db: Session = Depends(get_db)):
+    """Возвращает список опросов."""
     return crud.list_polls(db)
 
 
 @router.get("/{poll_id}", response_model=schemas.PollRead)
 def read_poll(poll_id: int, db: Session = Depends(get_db)):
+    """Возвращает один опрос или ошибку 404."""
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
@@ -34,6 +39,7 @@ def create_poll(
     db: Session = Depends(get_db),
     user: models.User = Depends(auth.get_current_user),
 ):
+    """Создаёт опрос от имени текущего пользователя."""
     poll = crud.create_poll(db, data.model_copy(update={"owner_id": user.id}))
     if poll is None:
         raise HTTPException(status_code=404, detail="Владелец опроса не найден")
@@ -47,6 +53,7 @@ def update_poll(
     db: Session = Depends(get_db),
     user: models.User = Depends(auth.get_current_user),
 ):
+    """Позволяет владельцу частично изменить опрос."""
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
@@ -61,6 +68,7 @@ def delete_poll(
     db: Session = Depends(get_db),
     user: models.User = Depends(auth.get_current_user),
 ):
+    """Позволяет владельцу удалить опрос."""
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise HTTPException(status_code=404, detail="Опрос не найден")
@@ -81,6 +89,7 @@ def submit_poll(
     db: Session = Depends(get_db),
     user: Optional[models.User] = Depends(auth.get_optional_user),
 ):
+    """Принимает анонимный или привязанный к участию набор ответов."""
     try:
         safe_data = data.model_copy(update={"user_id": user.id if user else None})
         return services.submit_answers(db, poll_id, safe_data)
@@ -90,6 +99,7 @@ def submit_poll(
 
 @router.get("/{poll_id}/results", response_model=schemas.PollResults)
 def read_results(poll_id: int, db: Session = Depends(get_db)):
+    """Возвращает разрешённую агрегированную статистику."""
     try:
         return services.get_results(db, poll_id)
     except services.VoteError as error:

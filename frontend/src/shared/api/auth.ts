@@ -1,3 +1,4 @@
+// Базовый адрес локального FastAPI backend.
 const API_URL = 'http://localhost:8000'
 
 export type TokenPair = {
@@ -6,16 +7,19 @@ export type TokenPair = {
   token_type: string
 }
 
+// Сохраняет пару токенов в пределах текущей вкладки.
 function saveTokens(tokens: TokenPair) {
   sessionStorage.setItem('accessToken', tokens.access_token)
   sessionStorage.setItem('refreshToken', tokens.refresh_token)
 }
 
+// Извлекает понятное сообщение из ошибочного ответа API.
 async function readError(response: Response) {
   const body = await response.json().catch(() => null)
   return body?.detail || 'Не удалось выполнить запрос.'
 }
 
+// Отправляет данные входа и сохраняет полученные токены.
 export async function login(email: string, password: string) {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
@@ -26,6 +30,7 @@ export async function login(email: string, password: string) {
   saveTokens(await response.json())
 }
 
+// Регистрирует пользователя и сохраняет его первую пару токенов.
 export async function register(email: string, password: string) {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
@@ -36,6 +41,7 @@ export async function register(email: string, password: string) {
   saveTokens(await response.json())
 }
 
+// Обменивает действующий refresh token на новую пару.
 export async function refreshAccessToken() {
   const refreshToken = sessionStorage.getItem('refreshToken')
   if (!refreshToken) return false
@@ -52,6 +58,7 @@ export async function refreshAccessToken() {
   return true
 }
 
+// Проверяет сессию и при необходимости один раз обновляет access token.
 export async function checkSession() {
   const accessToken = sessionStorage.getItem('accessToken')
   if (!accessToken) return false
@@ -66,6 +73,7 @@ export async function checkSession() {
   return response.ok
 }
 
+// Сообщает backend о выходе и очищает локальную сессию.
 export async function logout() {
   const refreshToken = sessionStorage.getItem('refreshToken')
   if (refreshToken) {
@@ -78,6 +86,7 @@ export async function logout() {
   clearTokens()
 }
 
+// Удаляет оба токена из sessionStorage.
 export function clearTokens() {
   sessionStorage.removeItem('accessToken')
   sessionStorage.removeItem('refreshToken')

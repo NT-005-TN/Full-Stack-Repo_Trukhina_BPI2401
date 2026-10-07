@@ -1,3 +1,5 @@
+"""Защищённые HTTP-маршруты пользовательских профилей."""
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
@@ -12,6 +14,7 @@ def read_users(
     db: Session = Depends(get_db),
     _: models.User = Depends(auth.get_current_user),
 ):
+    """Возвращает список только авторизованному пользователю."""
     return crud.list_users(db)
 
 
@@ -21,6 +24,7 @@ def read_user(
     db: Session = Depends(get_db),
     current: models.User = Depends(auth.get_current_user),
 ):
+    """Разрешает читать только собственный профиль."""
     if user_id != current.id:
         raise HTTPException(status_code=403, detail="Нет доступа к чужому профилю")
     user = crud.get_user(db, user_id)
@@ -31,6 +35,7 @@ def read_user(
 
 @router.post("", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(data: schemas.UserCreate, db: Session = Depends(get_db)):
+    """Создаёт пользователя через совместимый CRUD-маршрут."""
     user = crud.create_user(db, data)
     if user is None:
         raise HTTPException(status_code=409, detail="Такая почта уже зарегистрирована")
@@ -44,6 +49,7 @@ def update_user(
     db: Session = Depends(get_db),
     current: models.User = Depends(auth.get_current_user),
 ):
+    """Разрешает изменять только собственный профиль."""
     if user_id != current.id:
         raise HTTPException(status_code=403, detail="Нет доступа к чужому профилю")
     user = crud.get_user(db, user_id)
@@ -61,6 +67,7 @@ def delete_user(
     db: Session = Depends(get_db),
     current: models.User = Depends(auth.get_current_user),
 ):
+    """Разрешает удалить только собственный профиль без опросов."""
     if user_id != current.id:
         raise HTTPException(status_code=403, detail="Нет доступа к чужому профилю")
     user = crud.get_user(db, user_id)
