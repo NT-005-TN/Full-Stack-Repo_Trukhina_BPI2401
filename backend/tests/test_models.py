@@ -8,6 +8,7 @@ from app.models import Answer, Option, Participation, Poll, Question, Submission
 
 
 def test_related_records_are_saved() -> None:
+    """Опрос сохраняется вместе с вопросами и вариантами."""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
 
@@ -40,4 +41,6 @@ def test_related_records_are_saved() -> None:
 
 
 def test_submission_does_not_store_user_identity() -> None:
+    """Отправка ответов не содержит ссылку на пользователя."""
     assert "user_id" not in Submission.__table__.columns
+"""Проверки сохранения связанных ORM-сущностей и анонимности."""

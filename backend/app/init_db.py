@@ -1,3 +1,5 @@
+"""Команда первоначального создания таблиц базы данных."""
+
 from sqlalchemy.engine import Engine
 
 from . import models
@@ -5,6 +7,7 @@ from .database import Base, engine
 
 
 def create_tables(database_engine: Engine = engine) -> None:
+    """Создаёт отсутствующие таблицы по описанию ORM-моделей."""
     Base.metadata.create_all(database_engine)
 
 

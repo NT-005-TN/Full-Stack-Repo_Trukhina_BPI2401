@@ -1,3 +1,5 @@
+"""Pydantic-схемы для проверки входных данных и формирования ответов API."""
+
 from datetime import date, datetime
 from typing import List, Literal, Optional
 
@@ -5,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class UserCreate(BaseModel):
+    """Данные регистрации нового пользователя."""
     email: str = Field(min_length=5, max_length=255)
     password: str = Field(min_length=8, max_length=100)
 
@@ -17,6 +20,7 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
+    """Необязательные поля для частичного изменения пользователя."""
     email: Optional[str] = Field(default=None, min_length=5, max_length=255)
     password: Optional[str] = Field(default=None, min_length=8, max_length=100)
 
@@ -31,6 +35,7 @@ class UserUpdate(BaseModel):
 
 
 class UserRead(BaseModel):
+    """Безопасное представление пользователя без хеша пароля."""
     id: int
     email: str
     model_config = ConfigDict(from_attributes=True)
@@ -52,20 +57,24 @@ class TokenPair(BaseModel):
 
 
 class OptionCreate(BaseModel):
+    """Текст нового варианта ответа."""
     text: str = Field(min_length=1, max_length=300)
 
 
 class OptionRead(OptionCreate):
+    """Вариант ответа с присвоенным базой идентификатором."""
     id: int
     model_config = ConfigDict(from_attributes=True)
 
 
 class QuestionCreate(BaseModel):
+    """Новый вопрос минимум с двумя вариантами."""
     text: str = Field(min_length=1, max_length=500)
     options: List[OptionCreate] = Field(min_length=2)
 
 
 class QuestionRead(BaseModel):
+    """Вопрос с идентификатором и готовыми вариантами."""
     id: int
     text: str
     options: List[OptionRead]
@@ -73,6 +82,7 @@ class QuestionRead(BaseModel):
 
 
 class PollCreate(BaseModel):
+    """Полные данные для создания опроса."""
     title: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=1000)
     status: Literal["draft", "active"] = "draft"
@@ -91,6 +101,7 @@ class PollCreate(BaseModel):
 
 
 class PollUpdate(BaseModel):
+    """Разрешённые поля частичного обновления опроса."""
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
     description: Optional[str] = Field(default=None, max_length=1000)
     status: Optional[Literal["draft", "active", "finished"]] = None
@@ -109,6 +120,7 @@ class PollUpdate(BaseModel):
 
 
 class PollRead(BaseModel):
+    """Полное представление опроса для клиента."""
     id: int
     title: str
     description: str
@@ -122,16 +134,19 @@ class PollRead(BaseModel):
 
 
 class AnswerCreate(BaseModel):
+    """Выбор одного варианта в конкретном вопросе."""
     question_id: int
     option_id: int
 
 
 class SubmissionCreate(BaseModel):
+    """Набор ответов гостя или зарегистрированного пользователя."""
     user_id: Optional[int] = None
     answers: List[AnswerCreate] = Field(min_length=1)
 
 
 class SubmissionRead(BaseModel):
+    """Подтверждение зарегистрированной отправки ответов."""
     id: int
     poll_id: int
     created_at: datetime
@@ -139,12 +154,14 @@ class SubmissionRead(BaseModel):
 
 
 class OptionResult(BaseModel):
+    """Количество голосов за один вариант."""
     option_id: int
     text: str
     votes: int
 
 
 class QuestionResult(BaseModel):
+    """Агрегированная статистика одного вопроса."""
     question_id: int
     text: str
     total_votes: int
@@ -152,6 +169,7 @@ class QuestionResult(BaseModel):
 
 
 class PollResults(BaseModel):
+    """Анонимные результаты всех вопросов опроса."""
     poll_id: int
     title: str
     questions: List[QuestionResult]

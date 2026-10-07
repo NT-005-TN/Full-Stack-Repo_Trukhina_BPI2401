@@ -1,3 +1,5 @@
+"""Простые CRUD-операции над пользователями и опросами."""
+
 from typing import Optional
 
 from sqlalchemy import select
@@ -10,14 +12,17 @@ from .security import hash_password
 
 
 def list_users(db: Session) -> list[models.User]:
+    """Возвращает всех пользователей."""
     return list(db.scalars(select(models.User)).all())
 
 
 def get_user(db: Session, user_id: int) -> Optional[models.User]:
+    """Ищет пользователя по первичному ключу."""
     return db.get(models.User, user_id)
 
 
 def create_user(db: Session, data: schemas.UserCreate) -> Optional[models.User]:
+    """Создаёт пользователя или возвращает None при занятой почте."""
     user = models.User(
         email=data.email,
         password_hash=hash_password(data.password),
@@ -35,6 +40,7 @@ def create_user(db: Session, data: schemas.UserCreate) -> Optional[models.User]:
 def update_user(
     db: Session, user: models.User, data: schemas.UserUpdate
 ) -> Optional[models.User]:
+    """Изменяет переданные поля пользователя."""
     if data.email is not None:
         user.email = data.email
     if data.password is not None:
@@ -49,6 +55,7 @@ def update_user(
 
 
 def delete_user(db: Session, user: models.User) -> bool:
+    """Удаляет пользователя, если у него нет созданных опросов."""
     if user.polls:
         return False
     db.delete(user)
@@ -57,6 +64,7 @@ def delete_user(db: Session, user: models.User) -> bool:
 
 
 def list_polls(db: Session) -> list[models.Poll]:
+    """Возвращает опросы вместе с вопросами и вариантами."""
     statement = select(models.Poll).options(
         selectinload(models.Poll.questions).selectinload(models.Question.options)
     )
@@ -64,6 +72,7 @@ def list_polls(db: Session) -> list[models.Poll]:
 
 
 def get_poll(db: Session, poll_id: int) -> Optional[models.Poll]:
+    """Загружает один опрос и его вложенные сущности."""
     statement = (
         select(models.Poll)
         .where(models.Poll.id == poll_id)
@@ -75,6 +84,7 @@ def get_poll(db: Session, poll_id: int) -> Optional[models.Poll]:
 
 
 def create_poll(db: Session, data: schemas.PollCreate) -> Optional[models.Poll]:
+    """Создаёт опрос только для существующего владельца."""
     if db.get(models.User, data.owner_id) is None:
         return None
 
@@ -94,6 +104,7 @@ def create_poll(db: Session, data: schemas.PollCreate) -> Optional[models.Poll]:
 def update_poll(
     db: Session, poll: models.Poll, data: schemas.PollUpdate
 ) -> models.Poll:
+    """Применяет только переданные поля частичного обновления."""
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(poll, field, value)
     db.commit()
@@ -101,5 +112,6 @@ def update_poll(
 
 
 def delete_poll(db: Session, poll: models.Poll) -> None:
+    """Удаляет опрос вместе с зависимыми записями."""
     db.delete(poll)
     db.commit()
