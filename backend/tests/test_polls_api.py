@@ -13,6 +13,7 @@ from app.models import User
 
 @pytest.fixture()
 def client() -> TestClient:
+    """Создаёт тестовый API-клиент с отдельной базой."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -36,6 +37,7 @@ def client() -> TestClient:
 
 
 def poll_data() -> dict:
+    """Формирует корректное тело запроса для создания опроса."""
     return {
         "title": "Новый опрос",
         "description": "Описание",
@@ -51,6 +53,7 @@ def poll_data() -> dict:
 
 
 def test_poll_crud(client: TestClient) -> None:
+    """Проверяет создание, чтение, изменение и удаление опроса."""
     created = client.post("/polls", json=poll_data())
     assert created.status_code == 201
     poll_id = created.json()["id"]
@@ -68,6 +71,7 @@ def test_poll_crud(client: TestClient) -> None:
 
 
 def test_poll_validation_and_missing_owner(client: TestClient) -> None:
+    """Проверяет валидацию и ошибку отсутствующего владельца."""
     invalid = poll_data()
     invalid["questions"][0]["options"] = [{"text": "Один вариант"}]
     assert client.post("/polls", json=invalid).status_code == 422
@@ -77,3 +81,4 @@ def test_poll_validation_and_missing_owner(client: TestClient) -> None:
     response = client.post("/polls", json=missing_owner)
     assert response.status_code == 404
     assert response.json()["detail"] == "Владелец опроса не найден"
+"""Интеграционные проверки CRUD-маршрутов опросов."""
