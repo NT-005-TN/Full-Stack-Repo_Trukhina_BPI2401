@@ -1,3 +1,5 @@
+"""Точка входа FastAPI-приложения и подключение маршрутов."""
+
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,4 +20,5 @@ app.include_router(users.router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
+    """Простая проверка доступности backend."""
     return {"status": "ok"}

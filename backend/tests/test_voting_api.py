@@ -14,6 +14,7 @@ from app.security import create_access_token
 
 @pytest.fixture()
 def voting_client():
+    """Создаёт клиент и базу для сценариев голосования."""
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -36,6 +37,7 @@ def voting_client():
 
 
 def create_poll(client: TestClient, access: str = "public") -> dict:
+    """Вспомогательно создаёт активный опрос через API."""
     response = client.post(
         "/polls",
         json={
@@ -58,6 +60,7 @@ def create_poll(client: TestClient, access: str = "public") -> dict:
 
 
 def test_anonymous_submission_and_results(voting_client) -> None:
+    """Гость голосует, а API возвращает только общую статистику."""
     client, test_session = voting_client
     poll = create_poll(client)
     question = poll["questions"][0]
@@ -82,6 +85,7 @@ def test_anonymous_submission_and_results(voting_client) -> None:
 
 
 def test_registered_user_cannot_vote_twice(voting_client) -> None:
+    """Зарегистрированный пользователь не может ответить повторно."""
     client, _ = voting_client
     poll = create_poll(client, access="registered")
     question = poll["questions"][0]
@@ -100,6 +104,7 @@ def test_registered_user_cannot_vote_twice(voting_client) -> None:
 
 
 def test_submission_validation(voting_client) -> None:
+    """API отклоняет неполные и несогласованные ответы."""
     client, _ = voting_client
     poll = create_poll(client, access="registered")
     question = poll["questions"][0]
@@ -126,3 +131,4 @@ def test_submission_validation(voting_client) -> None:
         headers={"Authorization": f"Bearer {create_access_token(1)}"},
     )
     assert wrong_option.status_code == 422
+"""Интеграционные проверки голосования и анонимных результатов."""

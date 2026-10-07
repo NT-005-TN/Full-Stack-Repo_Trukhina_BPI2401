@@ -1,3 +1,5 @@
+"""Бизнес-правила голосования и расчёта результатов."""
+
 from datetime import date
 
 from sqlalchemy import func, select
@@ -8,6 +10,7 @@ from . import crud, models, schemas
 
 
 class VoteError(Exception):
+    """Ошибка бизнес-логики с подходящим HTTP-статусом."""
     def __init__(self, status_code: int, detail: str):
         self.status_code = status_code
         self.detail = detail
@@ -16,6 +19,7 @@ class VoteError(Exception):
 def submit_answers(
     db: Session, poll_id: int, data: schemas.SubmissionCreate
 ) -> models.Submission:
+    """Проверяет ответы и сохраняет анонимную отправку и факт участия."""
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise VoteError(404, "Опрос не найден")
@@ -70,6 +74,7 @@ def submit_answers(
 
 
 def get_results(db: Session, poll_id: int) -> schemas.PollResults:
+    """Считает агрегированные голоса без раскрытия участников."""
     poll = crud.get_poll(db, poll_id)
     if poll is None:
         raise VoteError(404, "Опрос не найден")

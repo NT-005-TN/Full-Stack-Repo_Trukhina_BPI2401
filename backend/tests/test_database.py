@@ -19,6 +19,7 @@ EXPECTED_TABLES = {
 
 
 def test_create_all_tables_and_foreign_keys() -> None:
+    """Все связанные таблицы создаются во временной базе."""
     engine = create_engine("sqlite:///:memory:")
     create_tables(engine)
     inspector = inspect(engine)
@@ -30,6 +31,7 @@ def test_create_all_tables_and_foreign_keys() -> None:
 
 
 def test_models_generate_postgresql_ddl() -> None:
+    """ORM-модели корректно компилируются для PostgreSQL."""
     statements = [
         str(CreateTable(table).compile(dialect=postgresql.dialect()))
         for table in Base.metadata.sorted_tables
@@ -38,3 +40,4 @@ def test_models_generate_postgresql_ddl() -> None:
     assert len(statements) == len(EXPECTED_TABLES)
     assert all("CREATE TABLE" in statement for statement in statements)
     assert any("FOREIGN KEY(owner_id) REFERENCES users" in statement for statement in statements)
+"""Проверки создания таблиц, внешних ключей и PostgreSQL DDL."""
