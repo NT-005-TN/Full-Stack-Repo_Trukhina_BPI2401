@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Chip, Tab, Tabs } from '@mui/material'
-import { CreatedPoll } from './types'
-
-// Демонстрационная история уже пройденных опросов.
-const completedPolls = [
-  { id: 1, title: 'Студенческие мероприятия', date: '4 сентября 2026' },
-  { id: 2, title: 'Выбор формата занятий', date: '1 сентября 2026' },
-]
+import { CompletedPoll, Poll } from './types'
 
 type HistoryPageProps = {
-  createdPolls: CreatedPoll[]
+  polls: Poll[]
+  completedPolls: CompletedPoll[]
 }
 
 // Страница переключается между участиями пользователя и созданными опросами.
-export default function HistoryPage({ createdPolls }: HistoryPageProps) {
+export default function HistoryPage({ polls, completedPolls }: HistoryPageProps) {
   const [tab, setTab] = useState(0)
+  const createdPolls = polls.filter((poll) => poll.isOwned)
 
   return (
     <main>
@@ -27,18 +23,23 @@ export default function HistoryPage({ createdPolls }: HistoryPageProps) {
       </Tabs>
 
       <div className="history-list">
-        {tab === 0 && completedPolls.map((poll) => (
+        {tab === 0 && completedPolls.map((completed) => {
+          const poll = polls.find((item) => item.id === completed.pollId)
+          if (!poll) return null
+          return (
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
-            <p>Пройден: {poll.date}</p>
+            <p>Пройден: {completed.completedAt}</p>
             <Chip color="success" label="Завершён" />
           </article>
-        ))}
+          )
+        })}
+        {tab === 0 && completedPolls.length === 0 && <p>Вы ещё не проходили опросы.</p>}
 
         {tab === 1 && createdPolls.map((poll) => (
           <article className="card" key={poll.id}>
             <h2>{poll.title}</h2>
-            <p>Вопросов: {poll.questionCount}</p>
+            <p>Вопросов: {poll.questions.length}</p>
             <Chip
               color={poll.status === 'Активен' ? 'success' : 'default'}
               label={poll.status}

@@ -1,13 +1,14 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { polls } from './pollData'
+import { Poll } from './types'
 
 type PollInfoPageProps = {
+  polls: Poll[]
   isLoggedIn: boolean
 }
 
 // Показывает описание и правила перед началом выбранного опроса.
-export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
+export default function PollInfoPage({ polls, isLoggedIn }: PollInfoPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
 
@@ -22,7 +23,7 @@ export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
 
   return (
     <main className="small-page">
-      <Chip color="success" label="Опрос активен" />
+      <Chip color={poll.status === 'Активен' ? 'success' : 'default'} label={poll.status} />
       <h1>{poll.title}</h1>
       <p>{poll.description}</p>
 
@@ -40,7 +41,7 @@ export default function PollInfoPage({ isLoggedIn }: PollInfoPageProps) {
         <Button component={Link} to="/">
           Назад
         </Button>
-        <Button component={Link} to={`/polls/${poll.id}/vote`} variant="contained">
+        <Button disabled={poll.status !== 'Активен'} component={Link} to={`/polls/${poll.id}/vote`} variant="contained">
           Начать опрос
         </Button>
       </div>

@@ -1,10 +1,30 @@
-// Допустимые состояния созданного опроса.
+// Допустимые состояния опроса.
 export type PollStatus = 'Черновик' | 'Активен' | 'Завершён'
 
-// Краткие данные опроса, которые показываются в истории и управлении.
-export type CreatedPoll = {
+export type ResultsAccess = 'after_vote' | 'after_finish' | 'hidden'
+
+export type PollQuestion = {
+  id: number
+  text: string
+  options: string[]
+  votes: number[]
+}
+
+// Полная модель используется созданием, прохождением, историей и результатами.
+export type Poll = {
   id: number
   title: string
-  questionCount: number
+  description: string
+  access: 'Для всех' | 'После входа'
   status: PollStatus
+  resultsAccess: ResultsAccess
+  endDate: string
+  isOwned: boolean
+  participantCount: number
+  questions: PollQuestion[]
+}
+
+export type CompletedPoll = {
+  pollId: number
+  completedAt: string
 }

@@ -1,16 +1,14 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { LinearProgress } from '@mui/material'
-import { polls } from './pollData'
-
-// Демонстрационные количества голосов для макета результатов ЛР №1.
-const voteCounts = [18, 12, 10, 7]
+import { Poll } from './types'
 
 type ResultsPageProps = {
+  polls: Poll[]
   isLoggedIn: boolean
 }
 
 // Показывает агрегированную статистику без данных отдельных участников.
-export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
+export default function ResultsPage({ polls, isLoggedIn }: ResultsPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
 
@@ -22,6 +20,14 @@ export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
     return <Navigate replace to="/login" />
   }
 
+  if (poll.resultsAccess === 'hidden') {
+    return <main><h1>Результаты не публикуются</h1></main>
+  }
+
+  if (poll.resultsAccess === 'after_finish' && poll.status !== 'Завершён') {
+    return <main><h1>Результаты будут доступны после завершения опроса</h1></main>
+  }
+
   return (
     <main>
       <h1>Результаты: {poll.title}</h1>
@@ -29,9 +35,7 @@ export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
 
       <div className="results-list">
         {poll.questions.map((question, questionIndex) => {
-          const counts = question.options.map((_, optionIndex) =>
-            voteCounts[(questionIndex + optionIndex) % voteCounts.length],
-          )
+          const counts = question.votes
           const totalVotes = counts.reduce((sum, votes) => sum + votes, 0)
 
           return (

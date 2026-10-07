@@ -12,7 +12,7 @@ import {
   Radio,
   RadioGroup,
 } from '@mui/material'
-import { polls } from './pollData'
+import { Poll } from './types'
 
 // Безопасно восстанавливает сохранённые ответы из sessionStorage.
 function loadAnswers(key: string) {
@@ -26,18 +26,23 @@ function loadAnswers(key: string) {
 }
 
 type PollPageProps = {
+  polls: Poll[]
   isLoggedIn: boolean
+  onSubmit: (pollId: number, answers: string[]) => void
 }
 
 // Страница прохождения опроса, проверки и отправки ответов.
-export default function PollPage({ isLoggedIn }: PollPageProps) {
+export default function PollPage({ polls, isLoggedIn, onSubmit }: PollPageProps) {
   const { pollId } = useParams()
   const selectedPoll = polls.find((item) => item.id === Number(pollId))
   const poll = selectedPoll || polls[0]
   const answersKey = `pollAnswers-${poll.id}`
   const questionKey = `pollQuestion-${poll.id}`
+  const savedQuestionIndex = Number(sessionStorage.getItem(questionKey) || 0)
   const [questionIndex, setQuestionIndex] = useState(
-    Number(sessionStorage.getItem(questionKey) || 0),
+    savedQuestionIndex >= 0 && savedQuestionIndex < poll.questions.length
+      ? savedQuestionIndex
+      : 0,
   )
   const [answers, setAnswers] = useState<string[]>(() => loadAnswers(answersKey))
   const [isReview, setIsReview] = useState(false)
@@ -62,6 +67,10 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
 
   if (poll.access === 'После входа' && !isLoggedIn) {
     return <Navigate replace to="/login" />
+  }
+
+  if (poll.status !== 'Активен') {
+    return <main><h1>Опрос не принимает ответы</h1></main>
   }
 
   // Записывает выбранный вариант для текущего вопроса.
@@ -142,6 +151,7 @@ export default function PollPage({ isLoggedIn }: PollPageProps) {
             <Button onClick={() => setIsConfirmOpen(false)}>Отмена</Button>
             <Button
               onClick={() => {
+                onSubmit(poll.id, answers)
                 sessionStorage.removeItem(answersKey)
                 sessionStorage.removeItem(questionKey)
                 setIsConfirmOpen(false)
