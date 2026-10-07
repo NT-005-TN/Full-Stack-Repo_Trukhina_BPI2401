@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Button, MenuItem, TextField } from '@mui/material'
-import { CreatedPoll } from './types'
+import { Poll, ResultsAccess } from './types'
 
 // Структура одного вопроса в форме создания опроса.
 type Question = {
@@ -12,7 +12,7 @@ type Question = {
 
 // Родитель передаёт обработчик для сохранения готовой карточки опроса.
 type CreatePollPageProps = {
-  onSave: (poll: CreatedPoll) => void
+  onSave: (poll: Poll) => void
 }
 
 // Форма создания опроса с динамическими вопросами и вариантами ответа.
@@ -21,7 +21,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [access, setAccess] = useState('public')
-  const [resultsAccess, setResultsAccess] = useState('after_finish')
+  const [resultsAccess, setResultsAccess] = useState<ResultsAccess>('after_finish')
   const [endDate, setEndDate] = useState('')
   const [error, setError] = useState('')
   const [questions, setQuestions] = useState<Question[]>([
@@ -30,16 +30,23 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
 
   // Изменяет текст выбранного вопроса.
   function changeQuestion(questionIndex: number, text: string) {
-    const newQuestions = [...questions]
-    newQuestions[questionIndex].text = text
-    setQuestions(newQuestions)
+    setQuestions(questions.map((question, index) =>
+      index === questionIndex ? { ...question, text } : question,
+    ))
   }
 
   // Изменяет один вариант ответа внутри выбранного вопроса.
   function changeOption(questionIndex: number, optionIndex: number, text: string) {
-    const newQuestions = [...questions]
-    newQuestions[questionIndex].options[optionIndex] = text
-    setQuestions(newQuestions)
+    setQuestions(questions.map((question, index) =>
+      index === questionIndex
+        ? {
+          ...question,
+          options: question.options.map((option, currentOptionIndex) =>
+            currentOptionIndex === optionIndex ? text : option,
+          ),
+        }
+        : question,
+    ))
   }
 
   // Добавляет новый вопрос с двумя пустыми вариантами.
@@ -57,18 +64,25 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
 
   // Добавляет пустой вариант ответа к выбранному вопросу.
   function addOption(questionIndex: number) {
-    const newQuestions = [...questions]
-    newQuestions[questionIndex].options.push('')
-    setQuestions(newQuestions)
+    setQuestions(questions.map((question, index) =>
+      index === questionIndex
+        ? { ...question, options: [...question.options, ''] }
+        : question,
+    ))
   }
 
   // Удаляет вариант, сохраняя минимум два варианта в интерфейсе.
   function removeOption(questionIndex: number, optionIndex: number) {
-    const newQuestions = [...questions]
-    newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter(
-      (_, index) => index !== optionIndex,
-    )
-    setQuestions(newQuestions)
+    setQuestions(questions.map((question, index) =>
+      index === questionIndex
+        ? {
+          ...question,
+          options: question.options.filter((_, currentOptionIndex) =>
+            currentOptionIndex !== optionIndex,
+          ),
+        }
+        : question,
+    ))
   }
 
   // Проверяет форму и сохраняет опрос как черновик или активный.
@@ -96,8 +110,17 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     onSave({
       id: Date.now(),
       title,
-      questionCount: questions.length,
+      description,
+      access: access === 'public' ? 'Для всех' : 'После входа',
       status: button.value === 'publish' ? 'Активен' : 'Черновик',
+      resultsAccess,
+      endDate,
+      isOwned: true,
+      participantCount: 0,
+      questions: questions.map((question) => ({
+        ...question,
+        votes: question.options.map(() => 0),
+      })),
     })
     navigate('/history')
   }
@@ -143,7 +166,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
             label="Когда показывать результаты"
             select
             value={resultsAccess}
-            onChange={(event) => setResultsAccess(event.target.value)}
+            onChange={(event) => setResultsAccess(event.target.value as ResultsAccess)}
           >
             <MenuItem value="after_vote">Сразу после ответа</MenuItem>
             <MenuItem value="after_finish">После завершения опроса</MenuItem>

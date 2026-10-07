@@ -8,15 +8,23 @@ import ManagePollPage from './ManagePollPage'
 import PollInfoPage from './PollInfoPage'
 import PollPage from './PollPage'
 import ResultsPage from './ResultsPage'
-import { polls } from './pollData'
-import { CreatedPoll, PollStatus } from './types'
+import { initialPolls } from './pollData'
+import { CompletedPoll, Poll, PollStatus } from './types'
+
+function loadSessionValue<T>(key: string, fallback: T): T {
+  try {
+    const saved = sessionStorage.getItem(key)
+    return saved ? JSON.parse(saved) : fallback
+  } catch {
+    return fallback
+  }
+}
 
 // Главная страница со списком и поиском доступных опросов.
-function PollList() {
+function PollList({ polls }: { polls: Poll[] }) {
   const [search, setSearch] = useState('')
-  const visiblePolls = polls.filter((poll) =>
-    poll.title.toLowerCase().includes(search.toLowerCase()),
-  )
+  const visiblePolls = polls.filter((poll) => poll.status === 'Активен')
+    .filter((poll) => poll.title.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <main>
@@ -43,7 +51,7 @@ function PollList() {
             <Button component={Link} to={`/polls/${poll.id}`} variant="contained">
               Открыть опрос
             </Button>
-            {poll.id === 1 && (
+            {poll.resultsAccess !== 'hidden' && (
               <Button component={Link} to={`/polls/${poll.id}/results`}>
                 Результаты
               </Button>
@@ -72,9 +80,12 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
     sessionStorage.getItem('isLoggedIn') === 'true',
   )
-  const [createdPolls, setCreatedPolls] = useState<CreatedPoll[]>([
-    { id: 1, title: 'Студенческие мероприятия', questionCount: 3, status: 'Черновик' },
-  ])
+  const [polls, setPolls] = useState<Poll[]>(() =>
+    loadSessionValue('polls', initialPolls),
+  )
+  const [completedPolls, setCompletedPolls] = useState<CompletedPoll[]>(() =>
+    loadSessionValue('completedPolls', []),
+  )
 
   // Сохраняет демонстрационный признак авторизации.
   function login() {
@@ -89,15 +100,47 @@ export default function App() {
   }
 
   // Добавляет созданный опрос в локальную историю пользователя.
-  function addCreatedPoll(newPoll: CreatedPoll) {
-    setCreatedPolls([...createdPolls, newPoll])
+  function savePolls(newPolls: Poll[]) {
+    setPolls(newPolls)
+    sessionStorage.setItem('polls', JSON.stringify(newPolls))
+  }
+
+  function addCreatedPoll(newPoll: Poll) {
+    savePolls([...polls, newPoll])
   }
 
   // Обновляет статус выбранного опроса без изменения остальных элементов.
   function changePollStatus(pollId: number, status: PollStatus) {
-    setCreatedPolls(createdPolls.map((poll) =>
+    savePolls(polls.map((poll) =>
       poll.id === pollId ? { ...poll, status } : poll,
     ))
+  }
+
+  function submitAnswers(pollId: number, answers: string[]) {
+    if (isLoggedIn && completedPolls.some((item) => item.pollId === pollId)) return
+
+    savePolls(polls.map((poll) => {
+      if (poll.id !== pollId) return poll
+      return {
+        ...poll,
+        participantCount: poll.participantCount + 1,
+        questions: poll.questions.map((question, questionIndex) => ({
+          ...question,
+          votes: question.votes.map((count, optionIndex) =>
+            question.options[optionIndex] === answers[questionIndex] ? count + 1 : count,
+          ),
+        })),
+      }
+    }))
+
+    if (isLoggedIn && !completedPolls.some((item) => item.pollId === pollId)) {
+      const updated = [...completedPolls, {
+        pollId,
+        completedAt: new Date().toLocaleDateString('ru-RU'),
+      }]
+      setCompletedPolls(updated)
+      sessionStorage.setItem('completedPolls', JSON.stringify(updated))
+    }
   }
 
   return (
@@ -120,7 +163,7 @@ export default function App() {
 
       {/* Таблица клиентских маршрутов: URL определяет отображаемую страницу. */}
       <Routes>
-        <Route path="/" element={<PollList />} />
+        <Route path="/" element={<PollList polls={polls} />} />
         <Route
           path="/login"
           element={<AuthPage onGuest={logout} onLogin={login} />}
@@ -134,18 +177,18 @@ export default function App() {
         <Route
           path="/history"
           element={isLoggedIn
-            ? <HistoryPage createdPolls={createdPolls} />
+            ? <HistoryPage polls={polls} completedPolls={completedPolls} />
             : <Navigate replace to="/login" />}
         />
         <Route
           path="/manage/:pollId"
           element={isLoggedIn
-            ? <ManagePollPage polls={createdPolls} onStatusChange={changePollStatus} />
+            ? <ManagePollPage polls={polls} onStatusChange={changePollStatus} />
             : <Navigate replace to="/login" />}
         />
-        <Route path="/polls/:pollId" element={<PollInfoPage isLoggedIn={isLoggedIn} />} />
-        <Route path="/polls/:pollId/vote" element={<PollPage isLoggedIn={isLoggedIn} />} />
-        <Route path="/polls/:pollId/results" element={<ResultsPage isLoggedIn={isLoggedIn} />} />
+        <Route path="/polls/:pollId" element={<PollInfoPage polls={polls} isLoggedIn={isLoggedIn} />} />
+        <Route path="/polls/:pollId/vote" element={<PollPage polls={polls} isLoggedIn={isLoggedIn} onSubmit={submitAnswers} />} />
+        <Route path="/polls/:pollId/results" element={<ResultsPage polls={polls} isLoggedIn={isLoggedIn} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

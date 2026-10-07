@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Chip } from '@mui/material'
-import { polls as demoPolls } from './pollData'
-import { CreatedPoll, PollStatus } from './types'
+import { Poll, PollStatus } from './types'
 
 type ManagePollPageProps = {
-  polls: CreatedPoll[]
+  polls: Poll[]
   onStatusChange: (pollId: number, status: PollStatus) => void
 }
 
@@ -13,8 +12,7 @@ type ManagePollPageProps = {
 export default function ManagePollPage({ polls, onStatusChange }: ManagePollPageProps) {
   const { pollId } = useParams()
   const [message, setMessage] = useState('')
-  const selectedPoll = polls.find((poll) => poll.id === Number(pollId))
-  const hasResults = demoPolls.some((poll) => poll.id === selectedPoll?.id)
+  const selectedPoll = polls.find((poll) => poll.id === Number(pollId) && poll.isOwned)
 
   if (!selectedPoll) {
     return <main><h1>Опрос не найден</h1></main>
@@ -48,8 +46,8 @@ export default function ManagePollPage({ polls, onStatusChange }: ManagePollPage
           />
         </div>
 
-        <p>Вопросов: {selectedPoll.questionCount}</p>
-        <p>Участников: {selectedPoll.status === 'Черновик' ? 0 : 40}</p>
+        <p>Вопросов: {selectedPoll.questions.length}</p>
+        <p>Участников: {selectedPoll.participantCount}</p>
 
         <div className="manage-actions">
           {selectedPoll.status === 'Черновик' && (
@@ -62,14 +60,14 @@ export default function ManagePollPage({ polls, onStatusChange }: ManagePollPage
               Завершить опрос
             </Button>
           )}
-          {selectedPoll.status !== 'Черновик' && hasResults && (
+          {selectedPoll.status !== 'Черновик' && selectedPoll.resultsAccess !== 'hidden' && (
             <Button component={Link} to={`/polls/${selectedPoll.id}/results`}>
               Посмотреть результаты
             </Button>
           )}
         </div>
-        {selectedPoll.status !== 'Черновик' && !hasResults && (
-          <p className="hint">Результаты появятся после получения ответов.</p>
+        {selectedPoll.resultsAccess === 'hidden' && (
+          <p className="hint">Публикация результатов отключена.</p>
         )}
       </section>
     </main>
