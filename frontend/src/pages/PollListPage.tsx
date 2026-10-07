@@ -4,6 +4,7 @@ import { Button, Chip, TextField } from '@mui/material'
 import { usePolls } from '../entities/poll/usePolls'
 import DataState from '../shared/ui/DataState'
 
+// Главная страница показывает загрузку, поиск и карточки опросов.
 export default function PollListPage() {
   const [search, setSearch] = useState('')
   const { polls, isLoading, error, retry } = usePolls()

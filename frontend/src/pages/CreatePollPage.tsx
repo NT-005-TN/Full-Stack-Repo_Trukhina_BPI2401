@@ -13,6 +13,7 @@ type CreatePollPageProps = {
   onSave: (poll: CreatedPoll) => void
 }
 
+// Форма создания опроса с динамическими вопросами и вариантами.
 export default function CreatePollPage({ onSave }: CreatePollPageProps) {
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
@@ -25,18 +26,21 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     { id: 1, text: '', options: ['', ''] },
   ])
 
+  // Изменяет текст выбранного вопроса.
   function changeQuestion(questionIndex: number, text: string) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].text = text
     setQuestions(newQuestions)
   }
 
+  // Изменяет один вариант ответа.
   function changeOption(questionIndex: number, optionIndex: number, text: string) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options[optionIndex] = text
     setQuestions(newQuestions)
   }
 
+  // Добавляет новый вопрос с двумя пустыми вариантами.
   function addQuestion() {
     setQuestions([
       ...questions,
@@ -44,16 +48,19 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     ])
   }
 
+  // Удаляет вопрос по его позиции.
   function removeQuestion(questionIndex: number) {
     setQuestions(questions.filter((_, index) => index !== questionIndex))
   }
 
+  // Добавляет вариант к выбранному вопросу.
   function addOption(questionIndex: number) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options.push('')
     setQuestions(newQuestions)
   }
 
+  // Удаляет лишний вариант ответа.
   function removeOption(questionIndex: number, optionIndex: number) {
     const newQuestions = [...questions]
     newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter(
@@ -62,6 +69,7 @@ export default function CreatePollPage({ onSave }: CreatePollPageProps) {
     setQuestions(newQuestions)
   }
 
+  // Проверяет форму и сохраняет черновик или активный опрос.
   function savePoll(event: FormEvent) {
     event.preventDefault()
     const submitEvent = event.nativeEvent as SubmitEvent

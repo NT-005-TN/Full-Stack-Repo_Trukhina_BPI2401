@@ -6,6 +6,7 @@ type DataStateProps = {
   onRetry?: () => void
 }
 
+// Общий компонент состояний загрузки, ошибки и отсутствия данных.
 export default function DataState({ type, message, onRetry }: DataStateProps) {
   if (type === 'loading') {
     return (

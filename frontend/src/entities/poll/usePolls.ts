@@ -9,12 +9,14 @@ type PollsState = {
   retry: () => void
 }
 
+// Имитирует асинхронную загрузку и возвращает все состояния запроса.
 export function usePolls(): PollsState {
   const [polls, setPolls] = useState<Poll[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
 
+  // Параметры URL позволяют показать loading и error без backend.
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
     const shouldFail = searchParams.get('error') === '1' && attempt === 0
@@ -32,6 +34,7 @@ export function usePolls(): PollsState {
       setIsLoading(false)
     }, delay)
 
+    // Таймер очищается, если компонент исчезает раньше завершения загрузки.
     return () => window.clearTimeout(timer)
   }, [attempt])
 

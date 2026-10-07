@@ -7,6 +7,7 @@ type AuthPageProps = {
   onGuest: () => void
 }
 
+// Общая страница входа и регистрации с переключением вкладок.
 export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [tab, setTab] = useState(0)
   const [password, setPassword] = useState('')
@@ -14,6 +15,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  // Проверяет пароль, выполняет учебный вход и открывает главную страницу.
   function submitForm(event: FormEvent) {
     event.preventDefault()
 
@@ -32,6 +34,7 @@ export default function AuthPage({ onLogin, onGuest }: AuthPageProps) {
     navigate('/')
   }
 
+  // Переключает форму и очищает прежнюю ошибку.
   function changeTab(newTab: number) {
     setTab(newTab)
     setError('')

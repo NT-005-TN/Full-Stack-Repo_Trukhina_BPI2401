@@ -3,12 +3,14 @@ import { LinearProgress } from '@mui/material'
 import { polls } from '../entities/poll/data'
 import PageMessage from '../shared/ui/PageMessage'
 
+// Демонстрационные количества голосов до подключения API.
 const voteCounts = [18, 12, 10, 7]
 
 type ResultsPageProps = {
   isLoggedIn: boolean
 }
 
+// Показывает только агрегированную статистику без данных участников.
 export default function ResultsPage({ isLoggedIn }: ResultsPageProps) {
   const { pollId } = useParams()
   const poll = polls.find((item) => item.id === Number(pollId))
